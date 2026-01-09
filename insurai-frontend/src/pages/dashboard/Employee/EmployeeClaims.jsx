@@ -731,7 +731,10 @@ const renderNewClaimForm = () => {
   }
 
   // Check if submit should be disabled
-  const isSubmitDisabled = newClaim.amount > remainingCoverage || loading;
+  const isSubmitDisabled =
+  loading ||
+  (remainingCoverage > 0 && newClaim.amount > remainingCoverage);
+
 
   return (
     <div className="container-fluid">

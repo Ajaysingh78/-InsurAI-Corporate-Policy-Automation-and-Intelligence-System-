@@ -7,20 +7,10 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-# Node
 node_modules
 dist
 dist-ssr
 *.local
-
-# Environment files (CRITICAL)
-.env
-.env.*
-!.env.example
-
-# Spring Boot / Maven
-target/
-*.jar
 
 # Editor directories and files
 .vscode/*

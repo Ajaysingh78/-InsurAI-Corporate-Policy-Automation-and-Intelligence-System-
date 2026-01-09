@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 export default function ForgotPassword() {
@@ -17,17 +17,17 @@ export default function ForgotPassword() {
     setLoading(true);
 
     try {
-      const res = await axios.post("http://localhost:8080/auth/forgot-password", { 
-        email: email.trim().toLowerCase() 
-      });
+      const res = await axios.post(
+        "http://localhost:8080/auth/forgot-password",
+        { email: email.trim().toLowerCase() }
+      );
 
-      // Backend now returns a plain string message, so handle accordingly
-      setMessage(res.data || "Password reset link sent! Check your email.");
+      setMessage(res.data || "Password reset link sent to your email.");
     } catch (err) {
       if (err.response?.status === 404) {
-        setError("Email not found. Please check or register.");
+        setError("Email not found. Please check and try again.");
       } else {
-        setError("Failed to send reset link. Try again later.");
+        setError("Unable to send reset link. Try again later.");
       }
     } finally {
       setLoading(false);
@@ -35,290 +35,183 @@ export default function ForgotPassword() {
   };
 
   return (
-    <div
-      className="d-flex justify-content-center align-items-center"
-      style={{
-        minHeight: "100vh",
-        width: "100vw",
-        background: "linear-gradient(135deg, #1b262c 0%, #143240 50%, #206c95 100%)",
-        padding: "20px",
-        fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-      }}
-    >
+    <>
+      {/* ANIMATIONS & GLOBAL STYLES */}
+      <style>{`
+        @keyframes gradientMove {
+          0% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
+        }
+
+        @keyframes fadeUp {
+          from { opacity: 0; transform: translateY(40px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+
+        .glass-box {
+          background: rgba(255,255,255,0.92);
+          backdrop-filter: blur(20px);
+          animation: fadeUp 0.8s ease;
+        }
+
+        .form-input:focus {
+          border-color: #2563eb;
+          box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
+        }
+
+        .submit-btn:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 12px 30px rgba(37,99,235,0.45);
+        }
+      `}</style>
+
       <div
-        className="card shadow-lg border-0"
+        className="d-flex justify-content-center align-items-center"
         style={{
-          maxWidth: "480px",
-          width: "95%",
-          borderRadius: "20px",
-          overflow: "hidden",
-          background: "rgba(255, 255, 255, 0.95)",
+          minHeight: "100vh",
+          background:
+            "linear-gradient(-45deg, #0f172a, #1e3a8a, #2563eb, #0f172a)",
+          backgroundSize: "400% 400%",
+          animation: "gradientMove 16s ease infinite",
+          fontFamily: "'Segoe UI', system-ui, sans-serif",
         }}
       >
-        <div className="card-body p-4 p-md-5">
-          {/* Header */}
+        <div
+          className="glass-box shadow-lg"
+          style={{
+            width: "100%",
+            maxWidth: "420px",
+            padding: "42px",
+            borderRadius: "22px",
+          }}
+        >
+          {/* HEADER */}
           <div className="text-center mb-4">
             <div
               style={{
-                width: "70px",
-                height: "70px",
-                background: "linear-gradient(135deg, #206c95, #1b262c)",
-                borderRadius: "16px",
-                margin: "0 auto 16px",
+                width: "78px",
+                height: "78px",
+                margin: "0 auto 18px",
+                borderRadius: "20px",
+                background:
+                  "linear-gradient(135deg, #2563eb, #1e40af)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                boxShadow: "0 8px 25px rgba(32, 108, 149, 0.3)",
-                color: "white",
+                color: "#fff",
+                fontSize: "28px",
+                boxShadow: "0 14px 35px rgba(37,99,235,0.45)",
               }}
             >
-              <svg
-                width="32"
-                height="32"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4" />
-              </svg>
+              🔐
             </div>
-            <h3 className="fw-bold" style={{ color: "#1b262c" }}>Reset Your Password</h3>
-            <p className="text-muted mb-0">
-              Enter your email to receive a password reset link
+            <h3 className="fw-bold mb-1">Forgot Password</h3>
+            <p className="text-muted">
+              Securely reset your account password
             </p>
           </div>
 
-          {/* Security Notice */}
-          <div 
-            className="alert alert-info d-flex align-items-center"
+          {/* INFO MESSAGE */}
+          <div
+            className="mb-4"
             style={{
-              borderRadius: "12px",
-              border: "none",
-              background: "rgba(32, 108, 149, 0.1)",
-              color: "#206c95",
-              fontSize: "0.9rem",
+              background: "rgba(37,99,235,0.08)",
               padding: "12px 16px",
-              marginBottom: "25px"
+              borderRadius: "12px",
+              color: "#2563eb",
+              fontSize: "0.9rem",
             }}
           >
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              className="me-2"
-            >
-              <circle cx="12" cy="12" r="10" />
-              <line x1="12" y1="16" x2="12" y2="12" />
-              <line x1="12" y1="8" x2="12.01" y2="8" />
-            </svg>
-            We'll send you a secure link to reset your password
+            We’ll send a secure password reset link to your registered email.
           </div>
 
-          {/* Error Alert */}
+          {/* ERROR */}
           {error && (
-            <div 
-              className="alert alert-danger d-flex align-items-center"
+            <div
+              className="mb-3"
               style={{
-                borderRadius: "12px",
-                border: "none",
-                background: "rgba(220, 53, 69, 0.1)",
-                color: "#dc3545",
+                background: "rgba(220,38,38,0.1)",
+                color: "#dc2626",
+                padding: "12px",
+                borderRadius: "10px",
                 fontSize: "0.9rem",
-                padding: "12px 16px",
-                marginBottom: "20px"
               }}
             >
-              <svg
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                className="me-2"
-              >
-                <circle cx="12" cy="12" r="10" />
-                <line x1="12" y1="8" x2="12" y2="12" />
-                <line x1="12" y1="16" x2="12.01" y2="16" />
-              </svg>
               {error}
             </div>
           )}
 
-          {/* Success Alert */}
+          {/* SUCCESS */}
           {message && (
-            <div 
-              className="alert alert-success d-flex align-items-center"
+            <div
+              className="mb-3"
               style={{
-                borderRadius: "12px",
-                border: "none",
-                background: "rgba(40, 167, 69, 0.1)",
-                color: "#28a745",
+                background: "rgba(22,163,74,0.1)",
+                color: "#16a34a",
+                padding: "12px",
+                borderRadius: "10px",
                 fontSize: "0.9rem",
-                padding: "12px 16px",
-                marginBottom: "20px"
               }}
             >
-              <svg
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                className="me-2"
-              >
-                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                <polyline points="22,4 12,14.01 9,11.01" />
-              </svg>
               {message}
             </div>
           )}
 
-          {/* Reset Form */}
+          {/* FORM */}
           <form onSubmit={handleSubmit}>
             <div className="mb-4">
-              <label className="form-label fw-semibold" style={{ color: "#1b262c", fontSize: "0.9rem" }}>
+              <label className="form-label fw-semibold">
                 Email Address
               </label>
-              <div className="position-relative">
-                <input
-                  type="email"
-                  className="form-control"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  placeholder="Enter your registered email"
-                  style={{
-                    borderRadius: "10px",
-                    border: "1px solid #e0e0e0",
-                    padding: "12px 16px 12px 44px",
-                    fontSize: "0.95rem",
-                    transition: "all 0.3s ease",
-                  }}
-                  onFocus={(e) => {
-                    e.target.style.borderColor = "#206c95";
-                    e.target.style.boxShadow = "0 0 0 3px rgba(32, 108, 149, 0.1)";
-                  }}
-                  onBlur={(e) => {
-                    e.target.style.borderColor = "#e0e0e0";
-                    e.target.style.boxShadow = "none";
-                  }}
-                />
-                <svg
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  className="position-absolute"
-                  style={{
-                    top: "50%",
-                    left: "16px",
-                    transform: "translateY(-50%)",
-                    color: "#206c95",
-                    opacity: 0.6,
-                  }}
-                >
-                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-                  <polyline points="22,6 12,13 2,6" />
-                </svg>
-              </div>
+              <input
+                type="email"
+                className="form-control form-input"
+                placeholder="you@insurai.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                style={{
+                  borderRadius: "12px",
+                  padding: "12px",
+                }}
+              />
             </div>
 
             <button
               type="submit"
-              className="btn w-100 fw-semibold position-relative"
               disabled={loading}
+              className="btn submit-btn w-100 fw-semibold"
               style={{
-                borderRadius: "10px",
-                background: "linear-gradient(135deg, #206c95, #1b262c)",
-                border: "none",
-                color: "white",
+                background:
+                  "linear-gradient(135deg, #2563eb, #1e40af)",
+                color: "#fff",
+                borderRadius: "12px",
                 padding: "14px",
-                fontSize: "1rem",
-                transition: "all 0.3s ease",
-                boxShadow: "0 4px 15px rgba(32, 108, 149, 0.3)",
-                opacity: loading ? 0.7 : 1,
-              }}
-              onMouseEnter={(e) => {
-                if (!loading) {
-                  e.target.style.transform = "translateY(-2px)";
-                  e.target.style.boxShadow = "0 6px 20px rgba(32, 108, 149, 0.4)";
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!loading) {
-                  e.target.style.transform = "translateY(0)";
-                  e.target.style.boxShadow = "0 4px 15px rgba(32, 108, 149, 0.3)";
-                }
+                border: "none",
+                transition: "0.3s ease",
               }}
             >
-              {loading ? (
-                <>
-                  <span className="spinner-border spinner-border-sm me-2" />
-                  Sending Reset Link...
-                </>
-              ) : (
-                "Send Reset Link"
-              )}
+              {loading ? "Sending link..." : "Send Reset Link"}
             </button>
           </form>
 
-          {/* Back to Login */}
+          {/* FOOTER */}
           <div className="text-center mt-4">
             <button
-              className="btn btn-link text-decoration-none p-0 border-0 d-inline-flex align-items-center"
-              style={{
-                color: "#206c95",
-                fontSize: "0.9rem",
-                fontWeight: "500",
-                transition: "color 0.3s ease",
-              }}
+              className="btn btn-link p-0 text-decoration-none fw-semibold"
+              style={{ color: "#2563eb" }}
               onClick={() => navigate("/employee/login")}
-              onMouseEnter={(e) => {
-                e.target.style.color = "#1b262c";
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.color = "#206c95";
-              }}
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="me-2">
-                <line x1="19" y1="12" x2="5" y2="12" />
-                <polyline points="12 19 5 12 12 5" />
-              </svg>
-              Back to Login
+              ← Back to Login
             </button>
-          </div>
 
-          {/* Security Badge */}
-          <div className="text-center mt-4 pt-3" style={{ borderTop: "1px solid #e0e0e0" }}>
-            <div className="d-flex align-items-center justify-content-center">
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                className="me-2"
-                style={{ color: "#206c95" }}
-              >
-                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-              </svg>
-              <small style={{ color: "#666", fontSize: "0.8rem" }}>
-                Secure Password Reset • Encrypted Connection
-              </small>
+            <div className="mt-3 text-muted" style={{ fontSize: "0.8rem" }}>
+              🔒 Secure • Encrypted • Trusted
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
