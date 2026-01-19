@@ -6,9 +6,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@SpringBootApplication(exclude = {
-    com.insurai.insurai_backend.service.SupabaseStorageService.class
-})
+@SpringBootApplication
 @EnableScheduling
 public class InsuraiBackendApplication {
 
@@ -17,7 +15,6 @@ public class InsuraiBackendApplication {
 	}
 }
 
-// Add a simple REST controller inside the same file or a new file
 @RestController
 class HelloController {
 
