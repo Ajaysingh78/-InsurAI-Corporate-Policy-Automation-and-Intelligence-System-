@@ -1042,7 +1042,7 @@ p, span, small, ul, li {
 .hover-shadow-lg:hover {
   box-shadow: 0 1rem 3rem rgba(0,0,0,.175) !important;
   transform: translateY(-2px);
-  // .hr update
+  // .hr update.
 }
 `}</style>
 

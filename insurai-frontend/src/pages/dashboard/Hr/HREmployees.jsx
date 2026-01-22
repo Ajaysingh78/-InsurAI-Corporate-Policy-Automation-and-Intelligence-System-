@@ -541,7 +541,7 @@ table tbody tr:hover {
 .transition-all {
   transition: all 0.3s ease;
 }
-  // .hr update
+  // .hr update.
 `}</style>
 
     </div>

@@ -878,7 +878,7 @@ export default function HRClaims({
 .hr-dashboard .cursor-pointer {
   cursor: pointer;
 }
-// .hr update
+// .hr update.
 `}</style>
 }</style>
     </div>
