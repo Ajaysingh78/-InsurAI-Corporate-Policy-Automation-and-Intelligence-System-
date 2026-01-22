@@ -597,6 +597,7 @@ thead.table-light th {
   transform: translateY(-2px);
 }
 .transition-all { transition: all 0.3s ease; }
+// .hr update
 `}</style>
 
     </div>

@@ -408,6 +408,7 @@ p, span, small, ul, li {
 ----------------------------- */
 .transition-all { transition: all 0.2s ease-in-out; }
 .cursor-pointer { cursor: pointer; }
+// .hr update
 `}</style>
 
     </div>

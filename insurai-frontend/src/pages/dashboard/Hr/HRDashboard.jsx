@@ -1673,7 +1673,7 @@ export default function HRDashboard() {
 .hr-dashboard .badge.bg-warning { background-color: rgba(234,179,8,.2) !important; color: #ca8a04 !important; }
 .hr-dashboard .badge.bg-danger { background-color: rgba(239,68,68,.2) !important; color: #b91c1c !important; }
 
-
+// .hr update
 `}</style>
 
     </div>
