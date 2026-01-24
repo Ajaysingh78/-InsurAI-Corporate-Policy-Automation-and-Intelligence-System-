@@ -467,54 +467,72 @@ const HomePage = () => {
           {/* Connection Lines and Module Cards */}
           {techStack.map((mod, i) => {
             const angle = (i * 360) / techStack.length;
-            const radius = 380;
+            const radius = 460; // Distance from center to module cards
+            const hubRadius = 200; // Half of central hub width (200px / 2)
             const x = Math.cos((angle - 90) * (Math.PI / 180)) * radius;
             const y = Math.sin((angle - 90) * (Math.PI / 180)) * radius;
+            
+            // Calculate start point (edge of hub)
+            const startX = Math.cos((angle - 90) * (Math.PI / 180)) * hubRadius;
+            const startY = Math.sin((angle - 90) * (Math.PI / 180)) * hubRadius;
 
             return (
               <React.Fragment key={i}>
                 {/* Connecting Line with Arrow */}
                 <motion.svg
                   style={{
-                    ...styles.techConnector,
-                    transform: `rotate(${angle}deg)`,
+                    position: "absolute",
+                    left: "50%",
+                    top: "50%",
+                    width: radius + 100,
+                    height: radius + 100,
+                    transform: `translate(-50%, -50%) rotate(${angle}deg)`,
+                    transformOrigin: "center",
+                    pointerEvents: "none",
+                    zIndex: 1,
+                    overflow: "visible",
                   }}
                   initial={{ pathLength: 0, opacity: 0 }}
-                  whileInView={{ pathLength: 1, opacity: 1 }}
+                  whileInView={{ pathLength: 1, opacity: 0.8 }}
                   transition={{ duration: 1, delay: i * 0.15 }}
                   viewport={{ once: true }}
-                  width="400"
-                  height="20"
                 >
                   <defs>
                     <linearGradient id={`gradient-${i}`} x1="0%" y1="0%" x2="100%" y2="0%">
-                      <stop offset="0%" style={{ stopColor: "rgba(56,189,248,0.8)", stopOpacity: 1 }} />
-                      <stop offset="50%" style={{ stopColor: "rgba(129,140,248,0.6)", stopOpacity: 1 }} />
-                      <stop offset="100%" style={{ stopColor: "rgba(244,114,182,0.4)", stopOpacity: 1 }} />
+                      <stop offset="0%" style={{ stopColor: "rgba(56,189,248,0.9)", stopOpacity: 1 }} />
+                      <stop offset="50%" style={{ stopColor: "rgba(129,140,248,0.8)", stopOpacity: 1 }} />
+                      <stop offset="100%" style={{ stopColor: "rgba(244,114,182,0.9)", stopOpacity: 1 }} />
                     </linearGradient>
                     <marker
                       id={`arrowhead-${i}`}
-                      markerWidth="10"
-                      markerHeight="10"
-                      refX="8"
-                      refY="3"
+                      markerWidth="12"
+                      markerHeight="12"
+                      refX="10"
+                      refY="6"
                       orient="auto"
                     >
-                      <polygon points="0 0, 10 3, 0 6" fill="rgba(56,189,248,0.8)" />
+                      <polygon 
+                        points="0 0, 12 6, 0 12" 
+                        fill="rgba(56,189,248,0.9)"
+                        stroke="rgba(129,140,248,0.6)"
+                        strokeWidth="0.5"
+                      />
                     </marker>
                   </defs>
                   <motion.line
-                    x1="0"
-                    y1="10"
-                    x2="380"
-                    y2="10"
+                    x1={(radius + 100)/2}
+                    y1={(radius + 100)/2}
+                    x2={radius - 30}
+                    y2={(radius + 100)/2}
                     stroke={`url(#gradient-${i})`}
-                    strokeWidth="2.5"
-                    strokeDasharray="8,4"
+                    strokeWidth="3"
+                    strokeDasharray="10 6"
                     markerEnd={`url(#arrowhead-${i})`}
+                    strokeLinecap="round"
+                    filter="drop-shadow(0 0 8px rgba(56,189,248,0.5))"
                     animate={{
-                      strokeDashoffset: [0, -12],
-                      transition: { duration: 2, repeat: Infinity, ease: "linear" }
+                      strokeDashoffset: [0, -16],
+                      transition: { duration: 2.5, repeat: Infinity, ease: "linear" }
                     }}
                   />
                 </motion.svg>
@@ -1529,12 +1547,12 @@ const styles = {
     position: "relative",
     width: "100%",
     maxWidth: "1400px",
-    minHeight: "1100px",
+    height: "1200px",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
     margin: "4rem auto",
-    padding: "2rem",
+    padding: "3rem",
   },
 
   techCentralHub: {
@@ -1577,21 +1595,12 @@ const styles = {
     letterSpacing: "1px",
   },
 
-  techConnector: {
-    position: "absolute",
-    left: "50%",
-    top: "50%",
-    transformOrigin: "left center",
-    marginLeft: "100px",
-    marginTop: "-5px",
-    pointerEvents: "none",
-    zIndex: 1,
-  },
+
 
   techModuleCard: {
     position: "absolute",
     transform: "translate(-50%, -50%)",
-    width: "280px",
+    width: "260px",
     background: "linear-gradient(135deg, rgba(15,23,42,0.95) 0%, rgba(15,23,42,0.85) 100%)",
     border: "2px solid rgba(56,189,248,0.3)",
     borderRadius: "20px",
