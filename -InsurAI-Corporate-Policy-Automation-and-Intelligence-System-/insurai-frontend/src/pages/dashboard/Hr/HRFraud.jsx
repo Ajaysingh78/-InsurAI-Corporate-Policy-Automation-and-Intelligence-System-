@@ -29,7 +29,7 @@ const HRFraud = () => {
   const fetchFraudAlerts = async () => {
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch("https://ingenious-surprise-production.up.railway.app/hr/claims/fraud", {
+      const response = await fetch("http://localhost:8080/hr/claims/fraud", {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
@@ -54,7 +54,7 @@ const HRFraud = () => {
 const fetchEmployees = async () => {
   try {
     const token = localStorage.getItem("token");
-    const res = await fetch("https://ingenious-surprise-production.up.railway.app/employees", {
+    const res = await fetch("http://localhost:8080/employees", {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -369,7 +369,7 @@ const employeeMap = useMemo(() => {
                       </td>
                       <td>
                         {a.documents?.map((doc, i) => (
-                          <a key={i} href={`https://ingenious-surprise-production.up.railway.app${doc}`} target="_blank" className="d-block">
+                          <a key={i} href={`http://localhost:8080${doc}`} target="_blank" className="d-block">
                             Doc {i + 1}
                           </a>
                         ))}
@@ -406,7 +406,7 @@ const employeeMap = useMemo(() => {
                 <p><strong>Documents:</strong></p>
                 <ul>
                   {viewingAlert.documents?.map((doc, i) => (
-                    <li key={i}><a href={`https://ingenious-surprise-production.up.railway.app${doc}`} target="_blank">Document {i + 1}</a></li>
+                    <li key={i}><a href={`http://localhost:8080${doc}`} target="_blank">Document {i + 1}</a></li>
                   ))}
                 </ul>
               </div>
@@ -419,9 +419,187 @@ const employeeMap = useMemo(() => {
       )}
 
       <style>{`
-        .cursor-pointer { cursor: pointer; }
-        .table-hover tbody tr:hover { background-color: rgba(0, 123, 255, 0.05); }
-      `}</style>
+/* =====================================================
+   🌌 HRFraud.jsx - Full Dark Glass Theme
+   Matches HRDashboard, HRClaims & HREmployees
+===================================================== */
+
+/* ----------------------------
+   Container text default
+----------------------------- */
+.container-fluid {
+  color: #e5e7eb !important;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+/* ----------------------------
+   Headers & Titles
+----------------------------- */
+h1, h2, h3, h4, h5, h6, strong {
+  color: #f8fafc !important;
+  font-weight: 600;
+}
+
+p, span, small, ul, li {
+  color: #c7d2fe !important;
+}
+
+/* ----------------------------
+   Glass Cards (KPI, Charts, Table Containers)
+----------------------------- */
+.card {
+  background: rgba(255, 255, 255, 0.06) !important;
+  backdrop-filter: blur(20px) !important;
+  border-radius: 22px !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  color: #e5e7eb !important;
+}
+
+/* Card headers */
+.card .card-header {
+  background: rgba(255, 255, 255, 0.08) !important;
+  backdrop-filter: blur(18px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
+  color: #f8fafc !important;
+}
+
+/* Card body */
+.card .card-body {
+  background: transparent !important;
+  color: #c7d2fe !important;
+}
+
+/* ----------------------------
+   KPI Cards
+----------------------------- */
+.card.bg-primary,
+.card.bg-success,
+.card.bg-warning,
+.card.bg-info,
+.card.bg-secondary {
+  color: #f8fafc !important;
+  box-shadow: 0 20px 55px rgba(0,0,0,.5);
+}
+
+/* Specific KPI colors */
+.text-primary { color: #0d6efd !important; }
+.text-success { color: #198754 !important; }
+.text-warning { color: #ffc107 !important; }
+.text-info { color: #0dcaf0 !important; }
+.text-secondary { color: #6c757d !important; }
+
+/* ----------------------------
+   Tables
+----------------------------- */
+table,
+thead,
+tbody,
+tr,
+th,
+td {
+  background: transparent !important;
+  color: #e5e7eb !important;
+  border-color: rgba(255,255,255,.12) !important;
+}
+
+thead.table-light th {
+  background: rgba(255,255,255,.08) !important;
+  color: #f8fafc !important;
+}
+
+/* Table hover effect */
+.table-hover tbody tr:hover {
+  background: rgba(0,123,255,.1) !important;
+}
+
+/* ----------------------------
+   Badges
+----------------------------- */
+.badge,
+.badge.bg-light,
+.badge.bg-success,
+.badge.bg-warning,
+.badge.bg-secondary,
+.badge.bg-danger {
+  background: rgba(255,255,255,.15) !important;
+  color: #fff !important;
+  border-radius: 12px;
+}
+
+.badge.bg-success { background-color: rgba(25,135,84,.2) !important; color: #198754 !important; }
+.badge.bg-warning { background-color: rgba(255,193,7,.2) !important; color: #ffc107 !important; }
+.badge.bg-danger { background-color: rgba(220,53,69,.2) !important; color: #dc3545 !important; }
+.badge.bg-secondary { background-color: rgba(108,117,125,.2) !important; color: #6c757d !important; }
+
+/* ----------------------------
+   Modals
+----------------------------- */
+.modal-content {
+  background: rgba(255,255,255,.06) !important;
+  backdrop-filter: blur(20px) !important;
+  border-radius: 22px;
+  border: 1px solid rgba(255,255,255,.18);
+  color: #e5e7eb !important;
+}
+
+.modal-header,
+.modal-footer {
+  background: rgba(255,255,255,.08) !important;
+  color: #f8fafc !important;
+  border-bottom: 1px solid rgba(255,255,255,.12);
+}
+
+.modal-body {
+  background: transparent !important;
+  color: #c7d2fe !important;
+}
+
+/* ----------------------------
+   Form Inputs
+----------------------------- */
+.form-control,
+.form-select,
+.input-group-text {
+  background: rgba(255,255,255,.08) !important;
+  color: #e5e7eb !important;
+  border: 1px solid rgba(255,255,255,.12) !important;
+  border-radius: 14px;
+}
+
+/* ----------------------------
+   Buttons
+----------------------------- */
+.btn-primary,
+.btn-success,
+.btn-warning,
+.btn-danger,
+.btn-outline-primary,
+.btn-outline-success,
+.btn-outline-warning,
+.btn-outline-secondary,
+.btn-outline-danger {
+  border-radius: 14px;
+}
+
+/* ----------------------------
+   Charts - Make chart containers glass
+----------------------------- */
+.card canvas {
+  background: transparent !important;
+}
+
+/* ----------------------------
+   Misc utility
+----------------------------- */
+.cursor-pointer { cursor: pointer; }
+.hover-shadow-lg:hover {
+  box-shadow: 0 1rem 3rem rgba(0,0,0,.175) !important;
+  transform: translateY(-2px);
+}
+.transition-all { transition: all 0.3s ease; }
+// .hr update.
+`}</style>
+
     </div>
   );
 };
