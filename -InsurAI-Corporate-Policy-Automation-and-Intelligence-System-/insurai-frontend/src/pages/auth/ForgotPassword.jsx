@@ -14,8 +14,10 @@ const theme = {
   neonBlue: "#38BDF8",
   neonPurple: "#818CF8",
   neonPink: "#F472B6",
-  gradientMain: "linear-gradient(135deg, #020617 0%, #020617 40%, #0F172A 100%)",
-  gradientNeon: "linear-gradient(135deg, #38BDF8 0%, #818CF8 50%, #F472B6 100%)",
+  gradientMain:
+    "linear-gradient(135deg, #020617 0%, #020617 40%, #0F172A 100%)",
+  gradientNeon:
+    "linear-gradient(135deg, #38BDF8 0%, #818CF8 50%, #F472B6 100%)",
 };
 
 export default function ForgotPassword() {
@@ -33,8 +35,8 @@ export default function ForgotPassword() {
 
     try {
       const res = await axios.post(
-        "https://ingenious-surprise-production.up.railway.app/auth/forgot-password",
-        { email: email.trim().toLowerCase() }
+        "https://insurai-backend-production.up.railway.app/auth/forgot-password",
+        { email: email.trim().toLowerCase() },
       );
 
       setMessage(res.data || "Password reset link sent to your email.");
@@ -66,7 +68,6 @@ export default function ForgotPassword() {
 
       <div style={styles.container}>
         <div style={styles.card}>
-          
           {/* Header */}
           <div style={styles.header}>
             <div style={styles.iconBox}>🔐</div>
@@ -80,18 +81,10 @@ export default function ForgotPassword() {
           </div>
 
           {/* Error Alert */}
-          {error && (
-            <div style={styles.errorBox}>
-              {error}
-            </div>
-          )}
+          {error && <div style={styles.errorBox}>{error}</div>}
 
           {/* Success Alert */}
-          {message && (
-            <div style={styles.successBox}>
-              {message}
-            </div>
-          )}
+          {message && <div style={styles.successBox}>{message}</div>}
 
           {/* Form */}
           <form onSubmit={handleSubmit} style={styles.form}>
@@ -107,11 +100,7 @@ export default function ForgotPassword() {
               />
             </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              style={styles.submitBtn}
-            >
+            <button type="submit" disabled={loading} style={styles.submitBtn}>
               {loading ? "Sending link..." : "Send Reset Link"}
             </button>
           </form>
@@ -124,9 +113,7 @@ export default function ForgotPassword() {
             >
               ← Back to Login
             </button>
-            <div style={styles.secureText}>
-              🔒 Secure • Encrypted • Trusted
-            </div>
+            <div style={styles.secureText}>🔒 Secure • Encrypted • Trusted</div>
           </div>
         </div>
 

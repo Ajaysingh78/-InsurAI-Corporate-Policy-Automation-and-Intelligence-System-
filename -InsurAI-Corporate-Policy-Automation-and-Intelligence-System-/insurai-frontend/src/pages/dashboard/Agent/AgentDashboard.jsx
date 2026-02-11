@@ -42,30 +42,44 @@ export default function AgentDashboard() {
       const axiosConfig = { headers: { Authorization: `Bearer ${token}` } };
 
       // Fetch availability
-      axios.get(`https://ingenious-surprise-production.up.railway.app/agent/${id}/availability`, axiosConfig)
-        .then(res => {
+      axios
+        .get(
+          `https://insurai-backend-production.up.railway.app/agent/${id}/availability`,
+          axiosConfig,
+        )
+        .then((res) => {
           if (res.data && typeof res.data.available === "boolean") {
             setAvailability(res.data.available);
           }
         })
-        .catch(err => console.error("Failed to fetch availability", err));
+        .catch((err) => console.error("Failed to fetch availability", err));
 
       // Fetch all employees once
       let employeeMap = {};
-      axios.get("https://ingenious-surprise-production.up.railway.app/auth/employees", axiosConfig)
-        .then(empRes => {
-          empRes.data.forEach(emp => {
+      axios
+        .get(
+          "https://insurai-backend-production.up.railway.app/auth/employees",
+          axiosConfig,
+        )
+        .then((empRes) => {
+          empRes.data.forEach((emp) => {
             employeeMap[emp.id] = emp.name;
           });
 
           // Fetch all queries
-          axios.get(`https://ingenious-surprise-production.up.railway.app/agent/queries/all/${id}`, axiosConfig)
-            .then(res => {
+          axios
+            .get(
+              `https://insurai-backend-production.up.railway.app/agent/queries/all/${id}`,
+              axiosConfig,
+            )
+            .then((res) => {
               if (res.data) {
-                const allQueries = res.data.map(q => ({
+                const allQueries = res.data.map((q) => ({
                   id: q.id,
                   employeeId: q.employeeId,
-                  employee: q.employee ? q.employee.name : employeeMap[q.employeeId] || `Employee ${q.employeeId}`,
+                  employee: q.employee
+                    ? q.employee.name
+                    : employeeMap[q.employeeId] || `Employee ${q.employeeId}`,
                   query: q.queryText,
                   policyName: q.policyName || "-",
                   claimType: q.claimType || "-",
@@ -74,29 +88,31 @@ export default function AgentDashboard() {
                   status: q.status === "resolved" ? "Resolved" : "Pending",
                   response: q.response || "",
                   agentId: q.agentId,
-                  allowEdit: q.status === "pending"
+                  allowEdit: q.status === "pending",
                 }));
 
                 setEmployeeQueries(allQueries);
 
                 // Derive assisted claims automatically
                 const resolvedClaims = allQueries
-                  .filter(q => q.status === "Resolved")
-                  .map(q => ({
+                  .filter((q) => q.status === "Resolved")
+                  .map((q) => ({
                     id: q.id,
                     employee: q.employee,
                     type: q.claimType || "-",
                     policyName: q.policyName || "-",
-                    date: q.updatedAt ? new Date(q.updatedAt).toLocaleString() : "-",
-                    status: "Approved"
+                    date: q.updatedAt
+                      ? new Date(q.updatedAt).toLocaleString()
+                      : "-",
+                    status: "Approved",
                   }));
 
                 setAssistedClaims(resolvedClaims);
               }
             })
-            .catch(err => console.error("Failed to fetch queries", err));
+            .catch((err) => console.error("Failed to fetch queries", err));
         })
-        .catch(err => console.error("Failed to fetch employees", err));
+        .catch((err) => console.error("Failed to fetch employees", err));
     } else {
       navigate("/agent/login");
     }
@@ -116,17 +132,26 @@ export default function AgentDashboard() {
 
       const axiosConfig = { headers: { Authorization: `Bearer ${token}` } };
 
-      await axios.post("https://ingenious-surprise-production.up.railway.app/agent/availability", {
-        agentId,
-        available: newStatus,
-        startTime: new Date().toISOString(),
-        endTime: null
-      }, axiosConfig);
+      await axios.post(
+        "https://insurai-backend-production.up.railway.app/agent/availability",
+        {
+          agentId,
+          available: newStatus,
+          startTime: new Date().toISOString(),
+          endTime: null,
+        },
+        axiosConfig,
+      );
 
-      const res = await axios.get(`https://ingenious-surprise-production.up.railway.app/agent/${agentId}/availability`, axiosConfig);
+      const res = await axios.get(
+        `https://insurai-backend-production.up.railway.app/agent/${agentId}/availability`,
+        axiosConfig,
+      );
       if (res.data) setAvailability(res.data.available);
 
-      alert(`You are now ${newStatus ? "available" : "unavailable"} for queries`);
+      alert(
+        `You are now ${newStatus ? "available" : "unavailable"} for queries`,
+      );
     } catch (error) {
       console.error("Error updating availability:", error);
       alert("Failed to update availability");
@@ -149,14 +174,21 @@ export default function AgentDashboard() {
       const startISO = new Date(futureFrom).toISOString();
       const endISO = new Date(futureTo).toISOString();
 
-      await axios.post("https://ingenious-surprise-production.up.railway.app/agent/availability", {
-        agentId,
-        available: true,
-        startTime: startISO,
-        endTime: endISO
-      }, axiosConfig);
+      await axios.post(
+        "https://insurai-backend-production.up.railway.app/agent/availability",
+        {
+          agentId,
+          available: true,
+          startTime: startISO,
+          endTime: endISO,
+        },
+        axiosConfig,
+      );
 
-      const res = await axios.get(`https://ingenious-surprise-production.up.railway.app/agent/${agentId}/availability`, axiosConfig);
+      const res = await axios.get(
+        `https://insurai-backend-production.up.railway.app/agent/${agentId}/availability`,
+        axiosConfig,
+      );
       if (res.data) setAvailability(res.data.available);
 
       alert("Future availability scheduled successfully!");
@@ -174,39 +206,46 @@ export default function AgentDashboard() {
       const token = localStorage.getItem("token");
       if (!token) return alert("No token found, please login again");
 
-      const query = employeeQueries.find(q => q.id === id);
+      const query = employeeQueries.find((q) => q.id === id);
       if (!query) return alert("Query not found");
 
       await axios.put(
-        `https://ingenious-surprise-production.up.railway.app/agent/queries/respond/${id}`,
+        `https://insurai-backend-production.up.railway.app/agent/queries/respond/${id}`,
         { response: responseText },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
 
-      setEmployeeQueries(prev =>
-        prev.map(q =>
+      setEmployeeQueries((prev) =>
+        prev.map((q) =>
           q.id === id
             ? {
                 ...q,
                 response: responseText,
                 status: isUpdate ? q.status : "Resolved",
-                allowEdit: isUpdate ? true : true
+                allowEdit: isUpdate ? true : true,
               }
-            : q
-        )
+            : q,
+        ),
       );
 
-      alert(isUpdate ? "Response updated successfully!" : "Response sent successfully!");
+      alert(
+        isUpdate
+          ? "Response updated successfully!"
+          : "Response sent successfully!",
+      );
     } catch (error) {
-      console.error("Failed to send/update response:", error.response?.data || error.message);
+      console.error(
+        "Failed to send/update response:",
+        error.response?.data || error.message,
+      );
       alert("Failed to send/update response");
     }
   };
 
   // -------------------- Handle response input changes --------------------
   const handleResponseChange = (id, value) => {
-    setEmployeeQueries(prev =>
-      prev.map(q => q.id === id ? { ...q, response: value } : q)
+    setEmployeeQueries((prev) =>
+      prev.map((q) => (q.id === id ? { ...q, response: value } : q)),
     );
   };
 
@@ -219,7 +258,7 @@ export default function AgentDashboard() {
       const end = parseInt(value);
       if (start === end) return;
 
-      const incrementTime = (duration / end);
+      const incrementTime = duration / end;
       const timer = setInterval(() => {
         start += 1;
         setCount(start);
@@ -235,7 +274,10 @@ export default function AgentDashboard() {
   // -------------------- Progress Bar Component --------------------
   const ProgressBar = ({ percentage, color = "success" }) => {
     return (
-      <div className="progress" style={{ height: "8px", backgroundColor: "#e9ecef" }}>
+      <div
+        className="progress"
+        style={{ height: "8px", backgroundColor: "#e9ecef" }}
+      >
         <div
           className={`progress-bar bg-${color}`}
           role="progressbar"
@@ -253,44 +295,59 @@ export default function AgentDashboard() {
     switch (activeTab) {
       case "home":
         const pendingQueries = employeeQueries.filter(
-          q => q.status === "Pending" || !q.response || q.response.trim() === ""
+          (q) =>
+            q.status === "Pending" || !q.response || q.response.trim() === "",
         );
 
-        const avgResponseTime = employeeQueries.length > 0
-          ? (employeeQueries.reduce((acc, q) => {
-              if (q.updatedAt && q.createdAt) {
-                return acc + (new Date(q.updatedAt) - new Date(q.createdAt));
-              }
-              return acc;
-            }, 0) / employeeQueries.length) / (1000 * 60 * 60)
-          : 0;
+        const avgResponseTime =
+          employeeQueries.length > 0
+            ? employeeQueries.reduce((acc, q) => {
+                if (q.updatedAt && q.createdAt) {
+                  return acc + (new Date(q.updatedAt) - new Date(q.createdAt));
+                }
+                return acc;
+              }, 0) /
+              employeeQueries.length /
+              (1000 * 60 * 60)
+            : 0;
 
-        const satisfactionRate = employeeQueries.length > 0
-          ? Math.round(
-              (employeeQueries.filter(q => q.status === "Resolved").length /
-                employeeQueries.length) *
-                100
-            )
-          : 0;
+        const satisfactionRate =
+          employeeQueries.length > 0
+            ? Math.round(
+                (employeeQueries.filter((q) => q.status === "Resolved").length /
+                  employeeQueries.length) *
+                  100,
+              )
+            : 0;
 
         return (
           <div className="w-100">
             {/* Header Section */}
             <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
               <div>
-                <h2 className="fw-bold text-gradient mb-2">Agent Dashboard Overview</h2>
-                <p className="text-muted mb-0">Welcome back, {agentName}. Here's your performance summary.</p>
+                <h2 className="fw-bold text-gradient mb-2">
+                  Agent Dashboard Overview
+                </h2>
+                <p className="text-muted mb-0">
+                  Welcome back, {agentName}. Here's your performance summary.
+                </p>
               </div>
               <div className="d-flex align-items-center gap-2">
-                <span className={`badge ${availability ? "bg-success" : "bg-warning"} fs-6 px-3 py-2`}>
-                  <i className={`bi ${availability ? "bi-check-circle" : "bi-clock"} me-1`}></i>
+                <span
+                  className={`badge ${availability ? "bg-success" : "bg-warning"} fs-6 px-3 py-2`}
+                >
+                  <i
+                    className={`bi ${availability ? "bi-check-circle" : "bi-clock"} me-1`}
+                  ></i>
                   {availability ? "Available" : "Unavailable"}
                 </span>
                 <button
                   className={`btn ${availability ? "btn-warning" : "btn-success"} btn-sm rounded-pill shadow-sm`}
                   onClick={toggleAvailability}
                 >
-                  <i className={`bi ${availability ? "bi-pause" : "bi-play"} me-1`}></i>
+                  <i
+                    className={`bi ${availability ? "bi-pause" : "bi-play"} me-1`}
+                  ></i>
                   {availability ? "Set Unavailable" : "Set Available"}
                 </button>
               </div>
@@ -304,7 +361,9 @@ export default function AgentDashboard() {
                   <div className="card-body">
                     <div className="d-flex justify-content-between align-items-start">
                       <div>
-                        <h6 className="card-subtitle text-muted mb-2">Pending Queries</h6>
+                        <h6 className="card-subtitle text-muted mb-2">
+                          Pending Queries
+                        </h6>
                         <h2 className="fw-bold text-primary mb-0">
                           <AnimatedCounter value={pendingQueries.length} />
                         </h2>
@@ -317,7 +376,14 @@ export default function AgentDashboard() {
                         <i className="bi bi-question-circle text-primary fs-4"></i>
                       </div>
                     </div>
-                    <ProgressBar percentage={(pendingQueries.length / Math.max(employeeQueries.length, 1)) * 100} color="warning" />
+                    <ProgressBar
+                      percentage={
+                        (pendingQueries.length /
+                          Math.max(employeeQueries.length, 1)) *
+                        100
+                      }
+                      color="warning"
+                    />
                   </div>
                 </div>
               </div>
@@ -328,7 +394,9 @@ export default function AgentDashboard() {
                   <div className="card-body">
                     <div className="d-flex justify-content-between align-items-start">
                       <div>
-                        <h6 className="card-subtitle text-muted mb-2">Assisted Claims</h6>
+                        <h6 className="card-subtitle text-muted mb-2">
+                          Assisted Claims
+                        </h6>
                         <h2 className="fw-bold text-success mb-0">
                           <AnimatedCounter value={assistedClaims.length} />
                         </h2>
@@ -341,7 +409,14 @@ export default function AgentDashboard() {
                         <i className="bi bi-file-earmark-check text-success fs-4"></i>
                       </div>
                     </div>
-                    <ProgressBar percentage={(assistedClaims.length / Math.max(employeeQueries.length, 1)) * 100} color="success" />
+                    <ProgressBar
+                      percentage={
+                        (assistedClaims.length /
+                          Math.max(employeeQueries.length, 1)) *
+                        100
+                      }
+                      color="success"
+                    />
                   </div>
                 </div>
               </div>
@@ -352,8 +427,12 @@ export default function AgentDashboard() {
                   <div className="card-body">
                     <div className="d-flex justify-content-between align-items-start">
                       <div>
-                        <h6 className="card-subtitle text-muted mb-2">Avg. Response Time</h6>
-                        <h2 className="fw-bold text-info mb-0">{avgResponseTime.toFixed(1)}h</h2>
+                        <h6 className="card-subtitle text-muted mb-2">
+                          Avg. Response Time
+                        </h6>
+                        <h2 className="fw-bold text-info mb-0">
+                          {avgResponseTime.toFixed(1)}h
+                        </h2>
                         <small className="text-muted">
                           <i className="bi bi-clock-fill text-info me-1"></i>
                           Industry avg: 2.5h
@@ -363,7 +442,10 @@ export default function AgentDashboard() {
                         <i className="bi bi-speedometer2 text-info fs-4"></i>
                       </div>
                     </div>
-                    <ProgressBar percentage={Math.min((avgResponseTime / 2.5) * 100, 100)} color="info" />
+                    <ProgressBar
+                      percentage={Math.min((avgResponseTime / 2.5) * 100, 100)}
+                      color="info"
+                    />
                   </div>
                 </div>
               </div>
@@ -374,8 +456,12 @@ export default function AgentDashboard() {
                   <div className="card-body">
                     <div className="d-flex justify-content-between align-items-start">
                       <div>
-                        <h6 className="card-subtitle text-muted mb-2">Satisfaction Rate</h6>
-                        <h2 className="fw-bold text-warning mb-0">{satisfactionRate}%</h2>
+                        <h6 className="card-subtitle text-muted mb-2">
+                          Satisfaction Rate
+                        </h6>
+                        <h2 className="fw-bold text-warning mb-0">
+                          {satisfactionRate}%
+                        </h2>
                         <small className="text-muted">
                           <i className="bi bi-star-fill text-warning me-1"></i>
                           Based on resolved queries
@@ -385,7 +471,10 @@ export default function AgentDashboard() {
                         <i className="bi bi-emoji-smile text-warning fs-4"></i>
                       </div>
                     </div>
-                    <ProgressBar percentage={satisfactionRate} color="warning" />
+                    <ProgressBar
+                      percentage={satisfactionRate}
+                      color="warning"
+                    />
                   </div>
                 </div>
               </div>
@@ -398,8 +487,10 @@ export default function AgentDashboard() {
                 <div className="card border-0 shadow-sm h-100">
                   <div className="card-header bg-transparent border-0 pb-0">
                     <div className="d-flex justify-content-between align-items-center">
-                      <h3 className="fw-bold text-gradient mb-0">Employee Queries</h3>
-                      <button 
+                      <h3 className="fw-bold text-gradient mb-0">
+                        Employee Queries
+                      </h3>
+                      <button
                         className="btn btn-outline-primary btn-sm rounded-pill"
                         onClick={() => setActiveTab("queries")}
                       >
@@ -410,21 +501,35 @@ export default function AgentDashboard() {
                   <div className="card-body">
                     <div className="activity-timeline">
                       {employeeQueries.slice(0, 5).map((query, index) => {
-                        const isAnswered = query.response && query.response.trim() !== "";
+                        const isAnswered =
+                          query.response && query.response.trim() !== "";
                         return (
-                          <div key={query.id} className="activity-item d-flex align-items-start mb-3">
+                          <div
+                            key={query.id}
+                            className="activity-item d-flex align-items-start mb-3"
+                          >
                             <div className="activity-indicator">
-                              <div className={`indicator-dot ${isAnswered ? 'bg-success' : 'bg-warning'}`}></div>
-                              {index < 4 && <div className="indicator-line"></div>}
+                              <div
+                                className={`indicator-dot ${isAnswered ? "bg-success" : "bg-warning"}`}
+                              ></div>
+                              {index < 4 && (
+                                <div className="indicator-line"></div>
+                              )}
                             </div>
                             <div className="activity-content flex-grow-1 ms-3">
                               <div className="d-flex justify-content-between align-items-start">
-                                <h6 className="mb-1 fw-semibold">{query.employee}</h6>
-                                <span className={`badge ${isAnswered ? 'bg-success' : 'bg-warning'} fs-7`}>
-                                  {isAnswered ? 'Resolved' : 'Pending'}
+                                <h6 className="mb-1 fw-semibold">
+                                  {query.employee}
+                                </h6>
+                                <span
+                                  className={`badge ${isAnswered ? "bg-success" : "bg-warning"} fs-7`}
+                                >
+                                  {isAnswered ? "Resolved" : "Pending"}
                                 </span>
                               </div>
-                              <p className="text-muted mb-1 small">{query.query}</p>
+                              <p className="text-muted mb-1 small">
+                                {query.query}
+                              </p>
                               <small className="text-muted">
                                 <i className="bi bi-clock me-1"></i>
                                 {new Date(query.createdAt).toLocaleDateString()}
@@ -436,7 +541,9 @@ export default function AgentDashboard() {
                       {employeeQueries.length === 0 && (
                         <div className="text-center py-4">
                           <i className="bi bi-inbox display-4 text-muted"></i>
-                          <p className="text-muted mt-2">No queries assigned yet</p>
+                          <p className="text-muted mt-2">
+                            No queries assigned yet
+                          </p>
                         </div>
                       )}
                     </div>
@@ -449,8 +556,10 @@ export default function AgentDashboard() {
                 <div className="card border-0 shadow-sm h-100">
                   <div className="card-header bg-transparent border-0 pb-0">
                     <div className="d-flex justify-content-between align-items-center">
-                      <h3 className="fw-bold text-gradient mb-0">Assisted Claims</h3>
-                      <button 
+                      <h3 className="fw-bold text-gradient mb-0">
+                        Assisted Claims
+                      </h3>
+                      <button
                         className="btn btn-outline-success btn-sm rounded-pill"
                         onClick={() => setActiveTab("claims")}
                       >
@@ -460,10 +569,17 @@ export default function AgentDashboard() {
                   </div>
                   <div className="card-body">
                     {assistedClaims.slice(0, 5).map((claim) => (
-                      <div key={claim.id} className="claim-item border-bottom pb-3 mb-3 last:border-0 last:mb-0 last:pb-0">
+                      <div
+                        key={claim.id}
+                        className="claim-item border-bottom pb-3 mb-3 last:border-0 last:mb-0 last:pb-0"
+                      >
                         <div className="d-flex justify-content-between align-items-start mb-2">
-                          <h6 className="mb-0 fw-semibold text-truncate">{claim.employee}</h6>
-                          <span className={`badge ${claim.status === 'Approved' ? 'bg-success' : 'bg-warning'} fs-7`}>
+                          <h6 className="mb-0 fw-semibold text-truncate">
+                            {claim.employee}
+                          </h6>
+                          <span
+                            className={`badge ${claim.status === "Approved" ? "bg-success" : "bg-warning"} fs-7`}
+                          >
                             {claim.status}
                           </span>
                         </div>
@@ -488,7 +604,9 @@ export default function AgentDashboard() {
                     {assistedClaims.length === 0 && (
                       <div className="text-center py-4">
                         <i className="bi bi-file-earmark-check display-4 text-muted"></i>
-                        <p className="text-muted mt-2">No claims assisted yet</p>
+                        <p className="text-muted mt-2">
+                          No claims assisted yet
+                        </p>
                       </div>
                     )}
                   </div>
@@ -550,7 +668,7 @@ export default function AgentDashboard() {
         <div className="container-fluid">
           <div className="row align-items-center">
             <div className="col-md-6 d-flex align-items-center">
-              <button 
+              <button
                 className="btn btn-light btn-sm me-3 d-md-none"
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               >
@@ -562,7 +680,9 @@ export default function AgentDashboard() {
                 </div>
                 <div>
                   <h2 className="mb-0 fw-bold">InsurAI Agent Portal</h2>
-                  <small className="text-light opacity-75">Assistance Suite v2.0</small>
+                  <small className="text-light opacity-75">
+                    Assistance Suite v2.0
+                  </small>
                 </div>
               </div>
             </div>
@@ -570,10 +690,17 @@ export default function AgentDashboard() {
             <div className="col-md-6 d-flex justify-content-end align-items-center">
               <div className="d-flex align-items-center gap-4">
                 <div className="text-end">
-                  <div className="fw-bold">{localStorage.getItem("agentName") || "Agent"}</div>
-                  <small className="text-light opacity-75">Insurance Agent</small>
+                  <div className="fw-bold">
+                    {localStorage.getItem("agentName") || "Agent"}
+                  </div>
+                  <small className="text-light opacity-75">
+                    Insurance Agent
+                  </small>
                 </div>
-                <div className="vr bg-light opacity-50" style={{height: '30px'}}></div>
+                <div
+                  className="vr bg-light opacity-50"
+                  style={{ height: "30px" }}
+                ></div>
                 <button
                   className="btn btn-outline-light btn-sm"
                   onClick={handleLogout}
@@ -590,19 +717,37 @@ export default function AgentDashboard() {
       {/* Main Layout */}
       <div className="dashboard-main d-flex">
         {/* Sidebar */}
-        <aside className={`dashboard-sidebar shadow-sm ${isMobileMenuOpen ? 'show' : ''}`}>
+        <aside
+          className={`dashboard-sidebar shadow-sm ${isMobileMenuOpen ? "show" : ""}`}
+        >
           <nav className="nav flex-column p-3">
             {[
               { id: "home", icon: "bi-speedometer2", label: "Dashboard" },
-              { id: "queries", icon: "bi-question-circle", label: "Employee Queries" },
-              { id: "claims", icon: "bi-file-earmark-check", label: "Assisted Claims" },
-              { id: "availability", icon: "bi-calendar-check", label: "Availability Settings" },
-              { id: "reports", icon: "bi-graph-up", label: "Agent Performance Reports" },
+              {
+                id: "queries",
+                icon: "bi-question-circle",
+                label: "Employee Queries",
+              },
+              {
+                id: "claims",
+                icon: "bi-file-earmark-check",
+                label: "Assisted Claims",
+              },
+              {
+                id: "availability",
+                icon: "bi-calendar-check",
+                label: "Availability Settings",
+              },
+              {
+                id: "reports",
+                icon: "bi-graph-up",
+                label: "Agent Performance Reports",
+              },
             ].map((item) => (
               <a
                 key={item.id}
                 href="#"
-                className={`nav-link sidebar-link ${activeTab === item.id ? 'active' : ''}`}
+                className={`nav-link sidebar-link ${activeTab === item.id ? "active" : ""}`}
                 onClick={(e) => {
                   e.preventDefault();
                   setActiveTab(item.id);
@@ -611,11 +756,16 @@ export default function AgentDashboard() {
               >
                 <i className={`${item.icon} me-3 fs-5`}></i>
                 {item.label}
-                {item.id === "queries" && employeeQueries.filter(q => q.status === "Pending").length > 0 && (
-                  <span className="badge bg-danger ms-auto">
-                    {employeeQueries.filter(q => q.status === "Pending").length}
-                  </span>
-                )}
+                {item.id === "queries" &&
+                  employeeQueries.filter((q) => q.status === "Pending").length >
+                    0 && (
+                    <span className="badge bg-danger ms-auto">
+                      {
+                        employeeQueries.filter((q) => q.status === "Pending")
+                          .length
+                      }
+                    </span>
+                  )}
               </a>
             ))}
           </nav>
@@ -624,7 +774,10 @@ export default function AgentDashboard() {
           <div className="sidebar-footer mt-auto p-3 small text-muted border-top">
             <div className="d-flex align-items-center mb-2">
               <div className="bg-success rounded-circle p-1 me-2">
-                <i className="bi bi-circle-fill text-success" style={{fontSize: '8px'}}></i>
+                <i
+                  className="bi bi-circle-fill text-success"
+                  style={{ fontSize: "8px" }}
+                ></i>
               </div>
               <span>System Online</span>
             </div>
@@ -634,9 +787,7 @@ export default function AgentDashboard() {
 
         {/* Content Area */}
         <main className="dashboard-content bg-light flex-grow-1">
-          <div className="dashboard-content-wrapper p-4">
-            {renderContent()}
-          </div>
+          <div className="dashboard-content-wrapper p-4">{renderContent()}</div>
         </main>
       </div>
 

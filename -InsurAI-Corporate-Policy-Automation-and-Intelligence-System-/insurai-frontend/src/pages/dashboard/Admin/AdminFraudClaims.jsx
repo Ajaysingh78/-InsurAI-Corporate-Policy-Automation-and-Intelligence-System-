@@ -20,18 +20,18 @@ import "jspdf-autotable";
 
 // Color constants
 const COLORS = {
-  PRIMARY: '#8b0086',        // Purple
-  ACCENT_2: '#d16ba5',       // Bright Orchid
-  ACCENT_3: '#b57edc',       // Lavender Mist
-  CONTRAST: '#5ce1e6',       // Cyan Aqua
-  WARNING: '#f5c518',        // Gold
-  BACKGROUND: '#ffffffff',     // Light Lavender White
-  TEXT_MUTED: '#6b5b6e',     // Grayish Violet
-  DARK: '#2b0938ff'          // Dark text
+  PRIMARY: "#8b0086", // Purple
+  ACCENT_2: "#d16ba5", // Bright Orchid
+  ACCENT_3: "#b57edc", // Lavender Mist
+  CONTRAST: "#5ce1e6", // Cyan Aqua
+  WARNING: "#f5c518", // Gold
+  BACKGROUND: "#ffffffff", // Light Lavender White
+  TEXT_MUTED: "#6b5b6e", // Grayish Violet
+  DARK: "#2b0938ff", // Dark text
 };
 
 // Gradient function
-const getPrimaryGradient = () => 
+const getPrimaryGradient = () =>
   `linear-gradient(135deg, #2b0938ff 0%, #8b0086ff 100%)`;
 
 ChartJS.register(
@@ -43,7 +43,7 @@ ChartJS.register(
   Title,
   Tooltip,
   Legend,
-  ArcElement
+  ArcElement,
 );
 
 export default function AdminFraudClaims() {
@@ -61,9 +61,12 @@ export default function AdminFraudClaims() {
         const token = localStorage.getItem("token");
         if (!token) return console.error("❌ No admin token found!");
 
-        const response = await axios.get("https://ingenious-surprise-production.up.railway.app/admin/claims/fraud", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const response = await axios.get(
+          "https://insurai-backend-production.up.railway.app/admin/claims/fraud",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          },
+        );
         setFraudClaims(response.data);
       } catch (error) {
         console.error("Error fetching fraud claims:", error);
@@ -88,8 +91,8 @@ export default function AdminFraudClaims() {
         statusFilter === "All"
           ? true
           : statusFilter === "Pending"
-          ? claim.status === "Pending"
-          : claim.status !== "Pending";
+            ? claim.status === "Pending"
+            : claim.status !== "Pending";
       return matchesSearch && matchesStatus;
     });
   }, [fraudClaims, searchTerm, statusFilter]);
@@ -124,38 +127,54 @@ export default function AdminFraudClaims() {
   };
 
   const formatCurrency = (amount) =>
-    new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR" }).format(amount);
+    new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
+    }).format(amount);
 
   // Statistics
   const stats = useMemo(() => {
     const total = fraudClaims.length;
     const pending = fraudClaims.filter((c) => c.status === "Pending").length;
     const resolved = total - pending;
-    const totalAmount = fraudClaims.reduce((sum, c) => sum + (parseFloat(c.amount) || 0), 0);
+    const totalAmount = fraudClaims.reduce(
+      (sum, c) => sum + (parseFloat(c.amount) || 0),
+      0,
+    );
     const pendingAmount = fraudClaims
       .filter((c) => c.status === "Pending")
       .reduce((sum, c) => sum + (parseFloat(c.amount) || 0), 0);
     const resolvedAmount = totalAmount - pendingAmount;
-    return { total, pending, resolved, totalAmount, pendingAmount, resolvedAmount };
+    return {
+      total,
+      pending,
+      resolved,
+      totalAmount,
+      pendingAmount,
+      resolvedAmount,
+    };
   }, [fraudClaims]);
 
   // Charts
   const monthlyData = useMemo(() => {
     const monthMap = {};
     fraudClaims.forEach((c) => {
-      const month = new Date(c.claimDate).toLocaleString("default", { month: "short", year: "numeric" });
+      const month = new Date(c.claimDate).toLocaleString("default", {
+        month: "short",
+        year: "numeric",
+      });
       if (!monthMap[month]) monthMap[month] = 0;
       monthMap[month] += parseFloat(c.amount) || 0;
     });
     return {
       labels: Object.keys(monthMap),
       datasets: [
-        { 
-          label: "Total Fraud Amount", 
-          data: Object.values(monthMap), 
+        {
+          label: "Total Fraud Amount",
+          data: Object.values(monthMap),
           backgroundColor: COLORS.ACCENT_2,
           borderColor: COLORS.ACCENT_2,
-          borderWidth: 2
+          borderWidth: 2,
         },
       ],
     };
@@ -164,20 +183,25 @@ export default function AdminFraudClaims() {
   const statusPieData = useMemo(
     () => ({
       labels: ["Pending", "Resolved"],
-      datasets: [{ 
-        data: [stats.pending, stats.resolved], 
-        backgroundColor: [COLORS.WARNING, "#198754"],
-        borderColor: [COLORS.WARNING, "#198754"],
-        borderWidth: 2
-      }],
+      datasets: [
+        {
+          data: [stats.pending, stats.resolved],
+          backgroundColor: [COLORS.WARNING, "#198754"],
+          borderColor: [COLORS.WARNING, "#198754"],
+          borderWidth: 2,
+        },
+      ],
     }),
-    [stats]
+    [stats],
   );
 
   const lineData = useMemo(() => {
     const monthMap = {};
     fraudClaims.forEach((c) => {
-      const month = new Date(c.claimDate).toLocaleString("default", { month: "short", year: "numeric" });
+      const month = new Date(c.claimDate).toLocaleString("default", {
+        month: "short",
+        year: "numeric",
+      });
       if (!monthMap[month]) monthMap[month] = 0;
       if (c.status !== "Pending") monthMap[month] += parseFloat(c.amount) || 0;
     });
@@ -198,7 +222,16 @@ export default function AdminFraudClaims() {
   // PDF export
   const exportPDF = () => {
     const doc = new jsPDF();
-    const tableColumn = ["ID", "Type", "Employee", "HR", "Claim Date", "Amount", "Status", "Fraud Reason"];
+    const tableColumn = [
+      "ID",
+      "Type",
+      "Employee",
+      "HR",
+      "Claim Date",
+      "Amount",
+      "Status",
+      "Fraud Reason",
+    ];
     const tableRows = sortedClaims.map((c) => [
       c.id,
       c.title,
@@ -213,17 +246,30 @@ export default function AdminFraudClaims() {
     doc.save("admin_fraud_claims.pdf");
   };
 
-  if (loading) return (
-    <div className="d-flex justify-content-center align-items-center" style={{ height: '400px', backgroundColor: COLORS.BACKGROUND }}>
-      <div className="spinner-border" style={{ color: COLORS.PRIMARY }} role="status">
-        <span className="visually-hidden">Loading...</span>
+  if (loading)
+    return (
+      <div
+        className="d-flex justify-content-center align-items-center"
+        style={{ height: "400px", backgroundColor: COLORS.BACKGROUND }}
+      >
+        <div
+          className="spinner-border"
+          style={{ color: COLORS.PRIMARY }}
+          role="status"
+        >
+          <span className="visually-hidden">Loading...</span>
+        </div>
       </div>
-    </div>
-  );
+    );
 
   return (
-    <div className="container-fluid" style={{ backgroundColor: COLORS.BACKGROUND, minHeight: '100vh' }}>
-      <h3 style={{ color: COLORS.DARK }} className="fw-bold mb-2">Admin Fraud Dashboard</h3>
+    <div
+      className="container-fluid"
+      style={{ backgroundColor: COLORS.BACKGROUND, minHeight: "100vh" }}
+    >
+      <h3 style={{ color: COLORS.DARK }} className="fw-bold mb-2">
+        Admin Fraud Dashboard
+      </h3>
 
       {/* Statistics Cards */}
       <div className="row mb-4">
@@ -231,18 +277,35 @@ export default function AdminFraudClaims() {
           { label: "Total Alerts", value: stats.total, color: COLORS.PRIMARY },
           { label: "Pending", value: stats.pending, color: COLORS.WARNING },
           { label: "Resolved", value: stats.resolved, color: "#198754" },
-          { label: "Total Amount", value: stats.totalAmount, color: COLORS.CONTRAST },
-          { label: "Pending Amount", value: stats.pendingAmount, color: COLORS.TEXT_MUTED },
-          { label: "Amount Saved", value: stats.resolvedAmount, color: "#198754" },
+          {
+            label: "Total Amount",
+            value: stats.totalAmount,
+            color: COLORS.CONTRAST,
+          },
+          {
+            label: "Pending Amount",
+            value: stats.pendingAmount,
+            color: COLORS.TEXT_MUTED,
+          },
+          {
+            label: "Amount Saved",
+            value: stats.resolvedAmount,
+            color: "#198754",
+          },
         ].map((s, i) => (
           <div key={i} className="col-md-2 col-6 mb-2">
-            <div className="card border-0 shadow-sm text-center" style={{ 
-              backgroundColor: `${s.color}15`,
-              borderLeft: `4px solid ${s.color}`
-            }}>
+            <div
+              className="card border-0 shadow-sm text-center"
+              style={{
+                backgroundColor: `${s.color}15`,
+                borderLeft: `4px solid ${s.color}`,
+              }}
+            >
               <div className="card-body">
                 <h5 style={{ color: s.color }}>
-                  {s.label.includes("Amount") ? formatCurrency(s.value) : s.value}
+                  {s.label.includes("Amount")
+                    ? formatCurrency(s.value)
+                    : s.value}
                 </h5>
                 <small style={{ color: COLORS.TEXT_MUTED }}>{s.label}</small>
               </div>
@@ -255,7 +318,10 @@ export default function AdminFraudClaims() {
       <div className="row mb-4">
         <div className="col-md-6 mb-3">
           <div className="card shadow-sm border-0">
-            <div className="card-header text-white" style={{ background: getPrimaryGradient() }}>
+            <div
+              className="card-header text-white"
+              style={{ background: getPrimaryGradient() }}
+            >
               Monthly Fraud Amount
             </div>
             <div className="card-body">
@@ -265,7 +331,10 @@ export default function AdminFraudClaims() {
         </div>
         <div className="col-md-3 mb-3">
           <div className="card shadow-sm border-0">
-            <div className="card-header text-dark" style={{ backgroundColor: COLORS.WARNING }}>
+            <div
+              className="card-header text-dark"
+              style={{ backgroundColor: COLORS.WARNING }}
+            >
               Status Distribution
             </div>
             <div className="card-body">
@@ -275,7 +344,10 @@ export default function AdminFraudClaims() {
         </div>
         <div className="col-md-3 mb-3">
           <div className="card shadow-sm border-0">
-            <div className="card-header text-white" style={{ backgroundColor: "#198754" }}>
+            <div
+              className="card-header text-white"
+              style={{ backgroundColor: "#198754" }}
+            >
               Amount Saved Over Time
             </div>
             <div className="card-body">
@@ -297,31 +369,35 @@ export default function AdminFraudClaims() {
           />
         </div>
         <div className="col-md-2 mb-2">
-          <select className="form-select" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+          <select
+            className="form-select"
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+          >
             <option value="All">All</option>
             <option value="Pending">Pending</option>
             <option value="Resolved">Resolved</option>
           </select>
         </div>
         <div className="col-md-6 d-flex gap-2 mb-2">
-          <CSVLink 
-            data={sortedClaims} 
-            filename="admin_fraud_claims.csv" 
+          <CSVLink
+            data={sortedClaims}
+            filename="admin_fraud_claims.csv"
             className="btn btn-sm"
-            style={{ 
+            style={{
               background: getPrimaryGradient(),
-              color: 'white',
-              border: 'none'
+              color: "white",
+              border: "none",
             }}
           >
             Export CSV
           </CSVLink>
-          <button 
+          <button
             className="btn btn-sm"
-            style={{ 
+            style={{
               background: getPrimaryGradient(),
-              color: 'white',
-              border: 'none'
+              color: "white",
+              border: "none",
             }}
             onClick={exportPDF}
           >
@@ -332,7 +408,10 @@ export default function AdminFraudClaims() {
 
       {/* Table */}
       <div className="card shadow-sm border-0">
-        <div className="card-header text-white" style={{ background: getPrimaryGradient() }}>
+        <div
+          className="card-header text-white"
+          style={{ background: getPrimaryGradient() }}
+        >
           Fraud Claims
         </div>
         <div className="card-body p-0">
@@ -340,12 +419,48 @@ export default function AdminFraudClaims() {
             <table className="table table-hover mb-0 align-middle">
               <thead className="table-light">
                 <tr>
-                  <th onClick={() => handleSort("id")} className="cursor-pointer" style={{ color: COLORS.DARK }}>ID</th>
-                  <th onClick={() => handleSort("title")} className="cursor-pointer" style={{ color: COLORS.DARK }}>Type</th>
-                  <th onClick={() => handleSort("employeeName")} className="cursor-pointer" style={{ color: COLORS.DARK }}>Employee</th>
-                  <th onClick={() => handleSort("assignedHrName")} className="cursor-pointer" style={{ color: COLORS.DARK }}>Assigned HR</th>
-                  <th onClick={() => handleSort("claimDate")} className="cursor-pointer" style={{ color: COLORS.DARK }}>Claim Date</th>
-                  <th onClick={() => handleSort("amount")} className="cursor-pointer text-end" style={{ color: COLORS.DARK }}>Amount</th>
+                  <th
+                    onClick={() => handleSort("id")}
+                    className="cursor-pointer"
+                    style={{ color: COLORS.DARK }}
+                  >
+                    ID
+                  </th>
+                  <th
+                    onClick={() => handleSort("title")}
+                    className="cursor-pointer"
+                    style={{ color: COLORS.DARK }}
+                  >
+                    Type
+                  </th>
+                  <th
+                    onClick={() => handleSort("employeeName")}
+                    className="cursor-pointer"
+                    style={{ color: COLORS.DARK }}
+                  >
+                    Employee
+                  </th>
+                  <th
+                    onClick={() => handleSort("assignedHrName")}
+                    className="cursor-pointer"
+                    style={{ color: COLORS.DARK }}
+                  >
+                    Assigned HR
+                  </th>
+                  <th
+                    onClick={() => handleSort("claimDate")}
+                    className="cursor-pointer"
+                    style={{ color: COLORS.DARK }}
+                  >
+                    Claim Date
+                  </th>
+                  <th
+                    onClick={() => handleSort("amount")}
+                    className="cursor-pointer text-end"
+                    style={{ color: COLORS.DARK }}
+                  >
+                    Amount
+                  </th>
                   <th style={{ color: COLORS.DARK }}>Status</th>
                   <th style={{ color: COLORS.DARK }}>Fraud Reason</th>
                 </tr>
@@ -353,27 +468,54 @@ export default function AdminFraudClaims() {
               <tbody>
                 {sortedClaims.length === 0 ? (
                   <tr>
-                    <td colSpan="8" className="text-center py-4" style={{ color: COLORS.TEXT_MUTED }}>
+                    <td
+                      colSpan="8"
+                      className="text-center py-4"
+                      style={{ color: COLORS.TEXT_MUTED }}
+                    >
                       No fraud claims found
                     </td>
                   </tr>
                 ) : (
                   sortedClaims.map((c) => (
-                    <tr key={c.id} onClick={() => setViewingClaim(c)} className="cursor-pointer">
+                    <tr
+                      key={c.id}
+                      onClick={() => setViewingClaim(c)}
+                      className="cursor-pointer"
+                    >
                       <td style={{ color: COLORS.DARK }}>{c.id}</td>
                       <td style={{ color: COLORS.DARK }}>{c.title}</td>
-                      <td style={{ color: COLORS.DARK }}>{c.employeeName || `#${c.employeeId}`}</td>
-                      <td style={{ color: COLORS.DARK }}>{c.assignedHrName || `HR #${c.assignedHrId}`}</td>
-                      <td style={{ color: COLORS.DARK }}>{c.claimDate?.split("T")[0]}</td>
-                      <td className="text-end" style={{ color: COLORS.DARK }}>{formatCurrency(c.amount)}</td>
+                      <td style={{ color: COLORS.DARK }}>
+                        {c.employeeName || `#${c.employeeId}`}
+                      </td>
+                      <td style={{ color: COLORS.DARK }}>
+                        {c.assignedHrName || `HR #${c.assignedHrId}`}
+                      </td>
+                      <td style={{ color: COLORS.DARK }}>
+                        {c.claimDate?.split("T")[0]}
+                      </td>
+                      <td className="text-end" style={{ color: COLORS.DARK }}>
+                        {formatCurrency(c.amount)}
+                      </td>
                       <td>
-                        <span className={`badge ${
-                          c.status === "Pending" ? "bg-warning" : c.status === "Approved" ? "bg-success" : "bg-danger"
-                        }`}>
+                        <span
+                          className={`badge ${
+                            c.status === "Pending"
+                              ? "bg-warning"
+                              : c.status === "Approved"
+                                ? "bg-success"
+                                : "bg-danger"
+                          }`}
+                        >
                           {c.status}
                         </span>
                       </td>
-                      <td className="fw-semibold" style={{ color: COLORS.ACCENT_2 }}>{c.fraudReason}</td>
+                      <td
+                        className="fw-semibold"
+                        style={{ color: COLORS.ACCENT_2 }}
+                      >
+                        {c.fraudReason}
+                      </td>
                     </tr>
                   ))
                 )}
@@ -385,50 +527,103 @@ export default function AdminFraudClaims() {
 
       {/* Modal */}
       {viewingClaim && (
-        <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: "rgba(0,0,0,0.6)" }}>
+        <div
+          className="modal show d-block"
+          tabIndex="-1"
+          style={{ backgroundColor: "rgba(0,0,0,0.6)" }}
+        >
           <div className="modal-dialog modal-xl modal-dialog-centered">
             <div className="modal-content shadow-lg border-0">
-              <div className="modal-header text-white" style={{ background: getPrimaryGradient() }}>
+              <div
+                className="modal-header text-white"
+                style={{ background: getPrimaryGradient() }}
+              >
                 <h5 className="modal-title">Fraud Claim #{viewingClaim.id}</h5>
-                <button type="button" className="btn-close btn-close-white" onClick={() => setViewingClaim(null)}></button>
+                <button
+                  type="button"
+                  className="btn-close btn-close-white"
+                  onClick={() => setViewingClaim(null)}
+                ></button>
               </div>
               <div className="modal-body">
                 <div className="row mb-3">
                   <div className="col-md-6">
-                    <p style={{ color: COLORS.DARK }}><strong>Employee:</strong> {viewingClaim.employeeName || `#${viewingClaim.employeeId}`}</p>
-                    <p style={{ color: COLORS.DARK }}><strong>Assigned HR:</strong> {viewingClaim.assignedHrName || `HR #${viewingClaim.assignedHrId}`}</p>
-                    <p style={{ color: COLORS.DARK }}><strong>Type:</strong> {viewingClaim.title}</p>
-                    <p style={{ color: COLORS.DARK }}><strong>Policy:</strong> {viewingClaim.policyName}</p>
+                    <p style={{ color: COLORS.DARK }}>
+                      <strong>Employee:</strong>{" "}
+                      {viewingClaim.employeeName ||
+                        `#${viewingClaim.employeeId}`}
+                    </p>
+                    <p style={{ color: COLORS.DARK }}>
+                      <strong>Assigned HR:</strong>{" "}
+                      {viewingClaim.assignedHrName ||
+                        `HR #${viewingClaim.assignedHrId}`}
+                    </p>
+                    <p style={{ color: COLORS.DARK }}>
+                      <strong>Type:</strong> {viewingClaim.title}
+                    </p>
+                    <p style={{ color: COLORS.DARK }}>
+                      <strong>Policy:</strong> {viewingClaim.policyName}
+                    </p>
                   </div>
                   <div className="col-md-6">
-                    <p style={{ color: COLORS.DARK }}><strong>Claim Date:</strong> {viewingClaim.claimDate?.split("T")[0]}</p>
-                    <p style={{ color: COLORS.DARK }}><strong>Amount:</strong> {formatCurrency(viewingClaim.amount)}</p>
-                    <p style={{ color: COLORS.DARK }}><strong>Status:</strong> 
-                      <span className={`badge ms-2 ${
-                        viewingClaim.status === "Pending" ? "bg-warning" :
-                        viewingClaim.status === "Approved" ? "bg-success" : "bg-danger"
-                      }`}>{viewingClaim.status}</span>
+                    <p style={{ color: COLORS.DARK }}>
+                      <strong>Claim Date:</strong>{" "}
+                      {viewingClaim.claimDate?.split("T")[0]}
                     </p>
-                    <p style={{ color: COLORS.DARK }}><strong>Fraud Flag:</strong> 
-                      {viewingClaim.fraudFlag ? <span className="badge bg-danger ms-2">Yes</span> : <span className="badge bg-success ms-2">No</span>}
+                    <p style={{ color: COLORS.DARK }}>
+                      <strong>Amount:</strong>{" "}
+                      {formatCurrency(viewingClaim.amount)}
+                    </p>
+                    <p style={{ color: COLORS.DARK }}>
+                      <strong>Status:</strong>
+                      <span
+                        className={`badge ms-2 ${
+                          viewingClaim.status === "Pending"
+                            ? "bg-warning"
+                            : viewingClaim.status === "Approved"
+                              ? "bg-success"
+                              : "bg-danger"
+                        }`}
+                      >
+                        {viewingClaim.status}
+                      </span>
+                    </p>
+                    <p style={{ color: COLORS.DARK }}>
+                      <strong>Fraud Flag:</strong>
+                      {viewingClaim.fraudFlag ? (
+                        <span className="badge bg-danger ms-2">Yes</span>
+                      ) : (
+                        <span className="badge bg-success ms-2">No</span>
+                      )}
                     </p>
                   </div>
                 </div>
                 <div className="mb-3">
-                  <p style={{ color: COLORS.DARK }}><strong>Fraud Reasons:</strong></p>
+                  <p style={{ color: COLORS.DARK }}>
+                    <strong>Fraud Reasons:</strong>
+                  </p>
                   <ul>
-                    {viewingClaim.fraudReason?.split(";").map((r, i) => r.trim() && <li key={i} style={{ color: COLORS.DARK }}>{r.trim()}</li>)}
+                    {viewingClaim.fraudReason?.split(";").map(
+                      (r, i) =>
+                        r.trim() && (
+                          <li key={i} style={{ color: COLORS.DARK }}>
+                            {r.trim()}
+                          </li>
+                        ),
+                    )}
                   </ul>
                 </div>
                 {viewingClaim.documents?.length > 0 && (
                   <div>
-                    <p style={{ color: COLORS.DARK }}><strong>Attached Documents:</strong></p>
+                    <p style={{ color: COLORS.DARK }}>
+                      <strong>Attached Documents:</strong>
+                    </p>
                     <ul>
                       {viewingClaim.documents.map((doc, i) => (
                         <li key={i}>
-                          <a 
-                            href={`https://ingenious-surprise-production.up.railway.app${doc}`} 
-                            target="_blank" 
+                          <a
+                            href={`https://insurai-backend-production.up.railway.app${doc}`}
+                            target="_blank"
                             rel="noopener noreferrer"
                             style={{ color: COLORS.PRIMARY }}
                           >
@@ -441,13 +636,13 @@ export default function AdminFraudClaims() {
                 )}
               </div>
               <div className="modal-footer">
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   className="btn"
-                  style={{ 
+                  style={{
                     background: getPrimaryGradient(),
-                    color: 'white',
-                    border: 'none'
+                    color: "white",
+                    border: "none",
                   }}
                   onClick={() => setViewingClaim(null)}
                 >

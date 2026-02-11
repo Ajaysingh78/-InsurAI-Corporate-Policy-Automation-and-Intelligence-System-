@@ -7,7 +7,7 @@ export default function HrRegister({ onBack }) {
     email: "",
     phoneNumber: "",
     hrId: "",
-    password: ""
+    password: "",
   });
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
@@ -15,18 +15,16 @@ export default function HrRegister({ onBack }) {
   const [showPassword, setShowPassword] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState(0);
 
- const validateEmail = (email) => {
-  const re = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-  return re.test(email);
-};
+  const validateEmail = (email) => {
+    const re = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    return re.test(email);
+  };
 
-
- const validatePhone = (phone) => {
-  const digits = phone.replace(/\D/g, '');
-  const re = /^[6-9]\d{9}$/;
-  return re.test(digits);
-};
-
+  const validatePhone = (phone) => {
+    const digits = phone.replace(/\D/g, "");
+    const re = /^[6-9]\d{9}$/;
+    return re.test(digits);
+  };
 
   const checkPasswordStrength = (password) => {
     let strength = 0;
@@ -51,13 +49,13 @@ export default function HrRegister({ onBack }) {
     return "Very Weak";
   };
 
-const handlePhoneChange = (e) => {
-  let value = e.target.value.replace(/\D/g, '');
-  if (value.length > 10) value = value.slice(0, 10);
-  const formattedValue = value.length > 5 ? value.slice(0, 5) + ' ' + value.slice(5) : value;
-  setNewHr({ ...newHr, phoneNumber: formattedValue });
-};
-
+  const handlePhoneChange = (e) => {
+    let value = e.target.value.replace(/\D/g, "");
+    if (value.length > 10) value = value.slice(0, 10);
+    const formattedValue =
+      value.length > 5 ? value.slice(0, 5) + " " + value.slice(5) : value;
+    setNewHr({ ...newHr, phoneNumber: formattedValue });
+  };
 
   const handlePasswordChange = (e) => {
     setNewHr({ ...newHr, password: e.target.value });
@@ -69,7 +67,9 @@ const handlePhoneChange = (e) => {
     setLoading(true);
 
     if (!validateEmail(newHr.email)) {
-      setError("⚠️ Please enter a valid email address (e.g., user@example.com).");
+      setError(
+        "⚠️ Please enter a valid email address (e.g., user@example.com).",
+      );
       setLoading(false);
       return;
     }
@@ -90,20 +90,26 @@ const handlePhoneChange = (e) => {
       }
 
       const response = await axios.post(
-        "https://ingenious-surprise-production.up.railway.app/admin/hr/register",
+        "https://insurai-backend-production.up.railway.app/admin/hr/register",
         newHr,
         {
-          headers: { 
+          headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`
+            Authorization: `Bearer ${token}`,
           },
           withCredentials: true,
-        }
+        },
       );
 
       setSuccess(response.data || "HR staff registered successfully!");
       setError("");
-      setNewHr({ name: "", email: "", phoneNumber: "", hrId: "", password: "" });
+      setNewHr({
+        name: "",
+        email: "",
+        phoneNumber: "",
+        hrId: "",
+        password: "",
+      });
       setPasswordStrength(0);
     } catch (err) {
       console.error("Register HR error:", err);
@@ -123,7 +129,9 @@ const handlePhoneChange = (e) => {
             <i className="bi bi-person-badge me-2 text-primary"></i>
             Register HR Staff
           </h4>
-          <p className="text-gray-600 mb-0">Create a new HR staff account with administrative access</p>
+          <p className="text-gray-600 mb-0">
+            Create a new HR staff account with administrative access
+          </p>
         </div>
         <div className="text-end">
           <div className="badge bg-primary">
@@ -137,31 +145,51 @@ const handlePhoneChange = (e) => {
       <div className="card shadow-sm border-0">
         <div className="card-header bg-white py-4 border-0">
           <div className="text-center">
-            <div className="bg-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
-                 style={{ width: "70px", height: "70px" }}>
+            <div
+              className="bg-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+              style={{ width: "70px", height: "70px" }}
+            >
               <i className="bi bi-person-badge text-white fs-3"></i>
             </div>
-            <h5 className="fw-bold text-gray-800 mb-2">HR Staff Registration</h5>
-            <p className="text-muted mb-0">Fill in the details to create a new HR account</p>
+            <h5 className="fw-bold text-gray-800 mb-2">
+              HR Staff Registration
+            </h5>
+            <p className="text-muted mb-0">
+              Fill in the details to create a new HR account
+            </p>
           </div>
         </div>
 
         <div className="card-body p-4 p-md-5">
           {/* Success Message */}
           {success && (
-            <div className="alert alert-success alert-dismissible fade show d-flex align-items-center mb-4" role="alert">
+            <div
+              className="alert alert-success alert-dismissible fade show d-flex align-items-center mb-4"
+              role="alert"
+            >
               <i className="bi bi-check-circle-fill me-2 fs-5"></i>
               <div className="flex-grow-1">{success}</div>
-              <button type="button" className="btn-close" onClick={() => setSuccess("")}></button>
+              <button
+                type="button"
+                className="btn-close"
+                onClick={() => setSuccess("")}
+              ></button>
             </div>
           )}
 
           {/* Error Message */}
           {error && (
-            <div className="alert alert-danger alert-dismissible fade show d-flex align-items-center mb-4" role="alert">
+            <div
+              className="alert alert-danger alert-dismissible fade show d-flex align-items-center mb-4"
+              role="alert"
+            >
               <i className="bi bi-exclamation-triangle-fill me-2 fs-5"></i>
               <div className="flex-grow-1">{error}</div>
-              <button type="button" className="btn-close" onClick={() => setError("")}></button>
+              <button
+                type="button"
+                className="btn-close"
+                onClick={() => setError("")}
+              ></button>
             </div>
           )}
 
@@ -170,7 +198,7 @@ const handlePhoneChange = (e) => {
             {/* Full Name Field */}
             <div className="mb-4">
               <label className="form-label fw-semibold text-gray-700 mb-3">
-                <i className="bi bi-person me-2 text-primary"></i> 
+                <i className="bi bi-person me-2 text-primary"></i>
                 Full Name
               </label>
               <div className="input-group input-group-lg">
@@ -191,7 +219,7 @@ const handlePhoneChange = (e) => {
             {/* Email Field */}
             <div className="mb-4">
               <label className="form-label fw-semibold text-gray-700 mb-3">
-                <i className="bi bi-envelope me-2 text-primary"></i> 
+                <i className="bi bi-envelope me-2 text-primary"></i>
                 Email Address
               </label>
               <div className="input-group input-group-lg">
@@ -202,7 +230,9 @@ const handlePhoneChange = (e) => {
                   type="email"
                   className="form-control border-start-0 py-3"
                   value={newHr.email}
-                  onChange={(e) => setNewHr({ ...newHr, email: e.target.value })}
+                  onChange={(e) =>
+                    setNewHr({ ...newHr, email: e.target.value })
+                  }
                   required
                   placeholder="Enter corporate email address"
                 />
@@ -216,7 +246,7 @@ const handlePhoneChange = (e) => {
             {/* Phone Number Field */}
             <div className="mb-4">
               <label className="form-label fw-semibold text-gray-700 mb-3">
-                <i className="bi bi-phone me-2 text-primary"></i> 
+                <i className="bi bi-phone me-2 text-primary"></i>
                 Phone Number
               </label>
               <div className="input-group input-group-lg">
@@ -242,7 +272,7 @@ const handlePhoneChange = (e) => {
             {/* HR ID Field */}
             <div className="mb-4">
               <label className="form-label fw-semibold text-gray-700 mb-3">
-                <i className="bi bi-id-card me-2 text-primary"></i> 
+                <i className="bi bi-id-card me-2 text-primary"></i>
                 HR ID
               </label>
               <div className="input-group input-group-lg">
@@ -267,7 +297,7 @@ const handlePhoneChange = (e) => {
             {/* Password Field */}
             <div className="mb-4">
               <label className="form-label fw-semibold text-gray-700 mb-3">
-                <i className="bi bi-lock me-2 text-primary"></i> 
+                <i className="bi bi-lock me-2 text-primary"></i>
                 Password
               </label>
               <div className="input-group input-group-lg">
@@ -287,7 +317,9 @@ const handlePhoneChange = (e) => {
                   className="input-group-text bg-light border-start-0"
                   onClick={() => setShowPassword(!showPassword)}
                 >
-                  <i className={`bi ${showPassword ? "bi-eye-slash" : "bi-eye"} text-gray-500`}></i>
+                  <i
+                    className={`bi ${showPassword ? "bi-eye-slash" : "bi-eye"} text-gray-500`}
+                  ></i>
                 </button>
               </div>
 
@@ -295,17 +327,23 @@ const handlePhoneChange = (e) => {
               {newHr.password && (
                 <div className="mt-3">
                   <div className="d-flex justify-content-between align-items-center mb-2">
-                    <small className="fw-semibold text-gray-700">Password Strength</small>
-                    <small className={`fw-bold ${
-                      passwordStrength >= 75 ? "text-success" :
-                      passwordStrength >= 50 ? "text-warning" :
-                      "text-danger"
-                    }`}>
+                    <small className="fw-semibold text-gray-700">
+                      Password Strength
+                    </small>
+                    <small
+                      className={`fw-bold ${
+                        passwordStrength >= 75
+                          ? "text-success"
+                          : passwordStrength >= 50
+                            ? "text-warning"
+                            : "text-danger"
+                      }`}
+                    >
                       {getPasswordStrengthText()}
                     </small>
                   </div>
                   <div className="progress" style={{ height: "6px" }}>
-                    <div 
+                    <div
                       className={`progress-bar ${getPasswordStrengthColor()}`}
                       style={{ width: `${passwordStrength}%` }}
                     ></div>
@@ -317,30 +355,54 @@ const handlePhoneChange = (e) => {
               <div className="form-text text-muted mt-3">
                 <div className="row">
                   <div className="col-6">
-                    <small className={`d-flex align-items-center mb-1 ${
-                      newHr.password.length >= 8 ? "text-success" : "text-muted"
-                    }`}>
-                      <i className={`bi ${newHr.password.length >= 8 ? "bi-check-circle-fill" : "bi-circle"} me-2`}></i>
+                    <small
+                      className={`d-flex align-items-center mb-1 ${
+                        newHr.password.length >= 8
+                          ? "text-success"
+                          : "text-muted"
+                      }`}
+                    >
+                      <i
+                        className={`bi ${newHr.password.length >= 8 ? "bi-check-circle-fill" : "bi-circle"} me-2`}
+                      ></i>
                       8+ characters
                     </small>
-                    <small className={`d-flex align-items-center mb-1 ${
-                      /[A-Z]/.test(newHr.password) ? "text-success" : "text-muted"
-                    }`}>
-                      <i className={`bi ${/[A-Z]/.test(newHr.password) ? "bi-check-circle-fill" : "bi-circle"} me-2`}></i>
+                    <small
+                      className={`d-flex align-items-center mb-1 ${
+                        /[A-Z]/.test(newHr.password)
+                          ? "text-success"
+                          : "text-muted"
+                      }`}
+                    >
+                      <i
+                        className={`bi ${/[A-Z]/.test(newHr.password) ? "bi-check-circle-fill" : "bi-circle"} me-2`}
+                      ></i>
                       Uppercase letter
                     </small>
                   </div>
                   <div className="col-6">
-                    <small className={`d-flex align-items-center mb-1 ${
-                      /[0-9]/.test(newHr.password) ? "text-success" : "text-muted"
-                    }`}>
-                      <i className={`bi ${/[0-9]/.test(newHr.password) ? "bi-check-circle-fill" : "bi-circle"} me-2`}></i>
+                    <small
+                      className={`d-flex align-items-center mb-1 ${
+                        /[0-9]/.test(newHr.password)
+                          ? "text-success"
+                          : "text-muted"
+                      }`}
+                    >
+                      <i
+                        className={`bi ${/[0-9]/.test(newHr.password) ? "bi-check-circle-fill" : "bi-circle"} me-2`}
+                      ></i>
                       Number
                     </small>
-                    <small className={`d-flex align-items-center mb-1 ${
-                      /[^A-Za-z0-9]/.test(newHr.password) ? "text-success" : "text-muted"
-                    }`}>
-                      <i className={`bi ${/[^A-Za-z0-9]/.test(newHr.password) ? "bi-check-circle-fill" : "bi-circle"} me-2`}></i>
+                    <small
+                      className={`d-flex align-items-center mb-1 ${
+                        /[^A-Za-z0-9]/.test(newHr.password)
+                          ? "text-success"
+                          : "text-muted"
+                      }`}
+                    >
+                      <i
+                        className={`bi ${/[^A-Za-z0-9]/.test(newHr.password) ? "bi-check-circle-fill" : "bi-circle"} me-2`}
+                      ></i>
                       Special character
                     </small>
                   </div>
@@ -383,7 +445,8 @@ const handlePhoneChange = (e) => {
           <div className="alert alert-light border mt-4 text-center">
             <small className="text-muted">
               <i className="bi bi-shield-check me-1 text-success"></i>
-              HR staff will have access to employee management and claims processing
+              HR staff will have access to employee management and claims
+              processing
             </small>
           </div>
         </div>
@@ -393,7 +456,7 @@ const handlePhoneChange = (e) => {
         .hr-registration {
           animation: fadeIn 0.5s ease-in;
         }
-        
+
         @keyframes fadeIn {
           from {
             opacity: 0;
@@ -404,14 +467,16 @@ const handlePhoneChange = (e) => {
             transform: translateY(0);
           }
         }
-        
+
         .card {
-          transition: transform 0.3s ease, box-shadow 0.3s ease;
+          transition:
+            transform 0.3s ease,
+            box-shadow 0.3s ease;
         }
-        
+
         .card:hover {
           transform: translateY(-2px);
-          box-shadow: 0 8px 25px rgba(0,0,0,0.1) !important;
+          box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1) !important;
         }
       `}</style>
     </div>

@@ -14,8 +14,10 @@ const theme = {
   neonBlue: "#38BDF8",
   neonPurple: "#818CF8",
   neonPink: "#F472B6",
-  gradientMain: "linear-gradient(135deg, #020617 0%, #020617 40%, #0F172A 100%)",
-  gradientNeon: "linear-gradient(135deg, #38BDF8 0%, #818CF8 50%, #F472B6 100%)",
+  gradientMain:
+    "linear-gradient(135deg, #020617 0%, #020617 40%, #0F172A 100%)",
+  gradientNeon:
+    "linear-gradient(135deg, #38BDF8 0%, #818CF8 50%, #F472B6 100%)",
 };
 
 export default function ResetPassword() {
@@ -61,8 +63,8 @@ export default function ResetPassword() {
     setLoading(true);
     try {
       const res = await axios.post(
-        `https://ingenious-surprise-production.up.railway.app/auth/reset-password/${token}`,
-        { newPassword: password }
+        `https://insurai-backend-production.up.railway.app/auth/reset-password/${token}`,
+        { newPassword: password },
       );
       setMessage(res.data || "Password reset successfully!");
       setTokenValid(false);
@@ -71,7 +73,9 @@ export default function ResetPassword() {
       const status = err.response?.status;
       const data = err.response?.data;
       if (status === 400) {
-        setError(typeof data === "string" ? data : "Invalid or expired reset token.");
+        setError(
+          typeof data === "string" ? data : "Invalid or expired reset token.",
+        );
         setTokenValid(false);
       } else {
         setError("Failed to reset password. Try again later.");
@@ -85,7 +89,6 @@ export default function ResetPassword() {
     <div style={styles.page}>
       <div style={styles.container}>
         <div style={styles.card}>
-          
           {/* Header */}
           <div style={styles.header}>
             <div style={styles.iconBox}>🔐</div>
@@ -101,23 +104,14 @@ export default function ResetPassword() {
           )}
 
           {/* Error Alert */}
-          {error && (
-            <div style={styles.errorBox}>
-              {error}
-            </div>
-          )}
+          {error && <div style={styles.errorBox}>{error}</div>}
 
           {/* Success Alert */}
-          {message && (
-            <div style={styles.successBox}>
-              {message}
-            </div>
-          )}
+          {message && <div style={styles.successBox}>{message}</div>}
 
           {/* Form */}
           {tokenValid && (
             <form onSubmit={handleSubmit} style={styles.form}>
-              
               {/* New Password */}
               <div style={styles.formGroup}>
                 <label style={styles.label}>New Password</label>
@@ -162,11 +156,7 @@ export default function ResetPassword() {
                 </div>
               </div>
 
-              <button
-                type="submit"
-                style={styles.submitBtn}
-                disabled={loading}
-              >
+              <button type="submit" style={styles.submitBtn} disabled={loading}>
                 {loading ? "Resetting Password..." : "Reset Password"}
               </button>
             </form>
@@ -180,9 +170,7 @@ export default function ResetPassword() {
             >
               ← Back to Login
             </button>
-            <div style={styles.secureText}>
-              🔒 Secure • Encrypted • Trusted
-            </div>
+            <div style={styles.secureText}>🔒 Secure • Encrypted • Trusted</div>
           </div>
         </div>
 

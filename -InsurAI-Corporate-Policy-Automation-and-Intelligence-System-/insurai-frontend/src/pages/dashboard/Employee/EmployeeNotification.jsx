@@ -29,8 +29,8 @@ export default function EmployeeNotification({ userDbId, token }) {
       try {
         const url =
           filter === "unread"
-            ? `https://ingenious-surprise-production.up.railway.app/notifications/user/${Number(userDbId)}/unread`
-            : `https://ingenious-surprise-production.up.railway.app/notifications/user/${Number(userDbId)}`;
+            ? `https://insurai-backend-production.up.railway.app/notifications/user/${Number(userDbId)}/unread`
+            : `https://insurai-backend-production.up.railway.app/notifications/user/${Number(userDbId)}`;
 
         const response = await axios.get(url, {
           params: { role: "EMPLOYEE" },
@@ -61,9 +61,9 @@ export default function EmployeeNotification({ userDbId, token }) {
   const markAsRead = async (notificationId) => {
     try {
       const response = await axios.put(
-        `https://ingenious-surprise-production.up.railway.app/notifications/${Number(notificationId)}/read`,
+        `https://insurai-backend-production.up.railway.app/notifications/${Number(notificationId)}/read`,
         {},
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
 
       if (response.status === 200 && response.data) {
@@ -71,8 +71,8 @@ export default function EmployeeNotification({ userDbId, token }) {
           prev.map((n) =>
             Number(n.id) === Number(notificationId)
               ? { ...n, readStatus: true }
-              : n
-          )
+              : n,
+          ),
         );
         setSelectedNotifications((prev) => {
           const newSet = new Set(prev);
@@ -106,19 +106,19 @@ export default function EmployeeNotification({ userDbId, token }) {
       await Promise.all(
         Array.from(selectedNotifications).map((id) =>
           axios.put(
-            `https://ingenious-surprise-production.up.railway.app/notifications/${Number(id)}/read`,
+            `https://insurai-backend-production.up.railway.app/notifications/${Number(id)}/read`,
             {},
-            { headers: { Authorization: `Bearer ${token}` } }
-          )
-        )
+            { headers: { Authorization: `Bearer ${token}` } },
+          ),
+        ),
       );
 
       setNotifications((prev) =>
         prev.map((n) =>
           selectedNotifications.has(Number(n.id))
             ? { ...n, readStatus: true }
-            : n
-        )
+            : n,
+        ),
       );
       setSelectedNotifications(new Set());
     } catch (err) {
@@ -137,11 +137,11 @@ export default function EmployeeNotification({ userDbId, token }) {
 
   const unreadCount = useMemo(
     () => notifications.filter((n) => !n.readStatus).length,
-    [notifications]
+    [notifications],
   );
   const readCount = useMemo(
     () => notifications.filter((n) => n.readStatus).length,
-    [notifications]
+    [notifications],
   );
 
   // ---------------- Loading / Error ----------------
@@ -293,12 +293,19 @@ export default function EmployeeNotification({ userDbId, token }) {
                   </p>
 
                   <div className="d-flex justify-content-between align-items-center mt-auto pt-2 border-top">
-                    <small className="text-muted" style={{ fontSize: "0.8rem" }}>
+                    <small
+                      className="text-muted"
+                      style={{ fontSize: "0.8rem" }}
+                    >
                       <i className="bi bi-clock me-1"></i>
                       {new Date(n.createdAt).toLocaleString()}
                     </small>
-                    <span className={`badge ${n.readStatus ? "bg-secondary" : "bg-primary"}`}>
-                      <i className={`bi ${n.readStatus ? "bi-check-circle" : "bi-circle"} me-1`}></i>
+                    <span
+                      className={`badge ${n.readStatus ? "bg-secondary" : "bg-primary"}`}
+                    >
+                      <i
+                        className={`bi ${n.readStatus ? "bi-check-circle" : "bi-circle"} me-1`}
+                      ></i>
                       {n.readStatus ? "Read" : "Unread"}
                     </span>
                   </div>
@@ -317,7 +324,10 @@ export default function EmployeeNotification({ userDbId, token }) {
               <i className="bi bi-check2-circle me-2"></i>
               {selectedNotifications.size} selected
             </span>
-            <button className="btn btn-light btn-sm" onClick={markMultipleAsRead}>
+            <button
+              className="btn btn-light btn-sm"
+              onClick={markMultipleAsRead}
+            >
               Mark as Read
             </button>
             <button

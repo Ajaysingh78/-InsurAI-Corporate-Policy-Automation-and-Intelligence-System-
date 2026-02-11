@@ -5,7 +5,7 @@ export default function AgentRegister({ onBack }) {
   const [newAgent, setNewAgent] = useState({
     name: "",
     email: "",
-    password: ""
+    password: "",
   });
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
@@ -55,7 +55,9 @@ export default function AgentRegister({ onBack }) {
     setLoading(true);
 
     if (!validateEmail(newAgent.email)) {
-      setError("⚠️ Please enter a valid email address (e.g., user@example.com).");
+      setError(
+        "⚠️ Please enter a valid email address (e.g., user@example.com).",
+      );
       setLoading(false);
       return;
     }
@@ -70,15 +72,15 @@ export default function AgentRegister({ onBack }) {
       }
 
       const response = await axios.post(
-        "https://ingenious-surprise-production.up.railway.app/admin/agent/register",
+        "https://insurai-backend-production.up.railway.app/admin/agent/register",
         newAgent,
         {
-          headers: { 
+          headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`
+            Authorization: `Bearer ${token}`,
           },
           withCredentials: true,
-        }
+        },
       );
 
       setSuccess(response.data || "Agent registered successfully!");
@@ -103,7 +105,9 @@ export default function AgentRegister({ onBack }) {
             <i className="bi bi-person-badge me-2 text-primary"></i>
             Register Insurance Agent
           </h4>
-          <p className="text-gray-600 mb-0">Create a new agent account with customer service access</p>
+          <p className="text-gray-600 mb-0">
+            Create a new agent account with customer service access
+          </p>
         </div>
         <div className="text-end">
           <div className="badge bg-primary">
@@ -117,31 +121,49 @@ export default function AgentRegister({ onBack }) {
       <div className="card shadow-sm border-0">
         <div className="card-header bg-white py-4 border-0">
           <div className="text-center">
-            <div className="bg-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
-                 style={{ width: "70px", height: "70px" }}>
+            <div
+              className="bg-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+              style={{ width: "70px", height: "70px" }}
+            >
               <i className="bi bi-person-badge text-white fs-3"></i>
             </div>
             <h5 className="fw-bold text-gray-800 mb-2">Agent Registration</h5>
-            <p className="text-muted mb-0">Fill in the details to create a new agent account</p>
+            <p className="text-muted mb-0">
+              Fill in the details to create a new agent account
+            </p>
           </div>
         </div>
 
         <div className="card-body p-4 p-md-5">
           {/* Success Message */}
           {success && (
-            <div className="alert alert-success alert-dismissible fade show d-flex align-items-center mb-4" role="alert">
+            <div
+              className="alert alert-success alert-dismissible fade show d-flex align-items-center mb-4"
+              role="alert"
+            >
               <i className="bi bi-check-circle-fill me-2 fs-5"></i>
               <div className="flex-grow-1">{success}</div>
-              <button type="button" className="btn-close" onClick={() => setSuccess("")}></button>
+              <button
+                type="button"
+                className="btn-close"
+                onClick={() => setSuccess("")}
+              ></button>
             </div>
           )}
 
           {/* Error Message */}
           {error && (
-            <div className="alert alert-danger alert-dismissible fade show d-flex align-items-center mb-4" role="alert">
+            <div
+              className="alert alert-danger alert-dismissible fade show d-flex align-items-center mb-4"
+              role="alert"
+            >
               <i className="bi bi-exclamation-triangle-fill me-2 fs-5"></i>
               <div className="flex-grow-1">{error}</div>
-              <button type="button" className="btn-close" onClick={() => setError("")}></button>
+              <button
+                type="button"
+                className="btn-close"
+                onClick={() => setError("")}
+              ></button>
             </div>
           )}
 
@@ -150,7 +172,7 @@ export default function AgentRegister({ onBack }) {
             {/* Full Name Field */}
             <div className="mb-4">
               <label className="form-label fw-semibold text-gray-700 mb-3">
-                <i className="bi bi-person me-2 text-primary"></i> 
+                <i className="bi bi-person me-2 text-primary"></i>
                 Full Name
               </label>
               <div className="input-group input-group-lg">
@@ -161,7 +183,9 @@ export default function AgentRegister({ onBack }) {
                   type="text"
                   className="form-control border-start-0 py-3"
                   value={newAgent.name}
-                  onChange={(e) => setNewAgent({ ...newAgent, name: e.target.value })}
+                  onChange={(e) =>
+                    setNewAgent({ ...newAgent, name: e.target.value })
+                  }
                   required
                   placeholder="Enter agent's full name"
                 />
@@ -171,7 +195,7 @@ export default function AgentRegister({ onBack }) {
             {/* Email Field */}
             <div className="mb-4">
               <label className="form-label fw-semibold text-gray-700 mb-3">
-                <i className="bi bi-envelope me-2 text-primary"></i> 
+                <i className="bi bi-envelope me-2 text-primary"></i>
                 Email Address
               </label>
               <div className="input-group input-group-lg">
@@ -182,7 +206,9 @@ export default function AgentRegister({ onBack }) {
                   type="email"
                   className="form-control border-start-0 py-3"
                   value={newAgent.email}
-                  onChange={(e) => setNewAgent({ ...newAgent, email: e.target.value })}
+                  onChange={(e) =>
+                    setNewAgent({ ...newAgent, email: e.target.value })
+                  }
                   required
                   placeholder="Enter corporate email address"
                 />
@@ -196,7 +222,7 @@ export default function AgentRegister({ onBack }) {
             {/* Password Field */}
             <div className="mb-4">
               <label className="form-label fw-semibold text-gray-700 mb-3">
-                <i className="bi bi-lock me-2 text-primary"></i> 
+                <i className="bi bi-lock me-2 text-primary"></i>
                 Password
               </label>
               <div className="input-group input-group-lg">
@@ -216,7 +242,9 @@ export default function AgentRegister({ onBack }) {
                   className="input-group-text bg-light border-start-0"
                   onClick={() => setShowPassword(!showPassword)}
                 >
-                  <i className={`bi ${showPassword ? "bi-eye-slash" : "bi-eye"} text-gray-500`}></i>
+                  <i
+                    className={`bi ${showPassword ? "bi-eye-slash" : "bi-eye"} text-gray-500`}
+                  ></i>
                 </button>
               </div>
 
@@ -224,17 +252,23 @@ export default function AgentRegister({ onBack }) {
               {newAgent.password && (
                 <div className="mt-3">
                   <div className="d-flex justify-content-between align-items-center mb-2">
-                    <small className="fw-semibold text-gray-700">Password Strength</small>
-                    <small className={`fw-bold ${
-                      passwordStrength >= 75 ? "text-success" :
-                      passwordStrength >= 50 ? "text-warning" :
-                      "text-danger"
-                    }`}>
+                    <small className="fw-semibold text-gray-700">
+                      Password Strength
+                    </small>
+                    <small
+                      className={`fw-bold ${
+                        passwordStrength >= 75
+                          ? "text-success"
+                          : passwordStrength >= 50
+                            ? "text-warning"
+                            : "text-danger"
+                      }`}
+                    >
                       {getPasswordStrengthText()}
                     </small>
                   </div>
                   <div className="progress" style={{ height: "6px" }}>
-                    <div 
+                    <div
                       className={`progress-bar ${getPasswordStrengthColor()}`}
                       style={{ width: `${passwordStrength}%` }}
                     ></div>
@@ -246,30 +280,54 @@ export default function AgentRegister({ onBack }) {
               <div className="form-text text-muted mt-3">
                 <div className="row">
                   <div className="col-6">
-                    <small className={`d-flex align-items-center mb-1 ${
-                      newAgent.password.length >= 8 ? "text-success" : "text-muted"
-                    }`}>
-                      <i className={`bi ${newAgent.password.length >= 8 ? "bi-check-circle-fill" : "bi-circle"} me-2`}></i>
+                    <small
+                      className={`d-flex align-items-center mb-1 ${
+                        newAgent.password.length >= 8
+                          ? "text-success"
+                          : "text-muted"
+                      }`}
+                    >
+                      <i
+                        className={`bi ${newAgent.password.length >= 8 ? "bi-check-circle-fill" : "bi-circle"} me-2`}
+                      ></i>
                       8+ characters
                     </small>
-                    <small className={`d-flex align-items-center mb-1 ${
-                      /[A-Z]/.test(newAgent.password) ? "text-success" : "text-muted"
-                    }`}>
-                      <i className={`bi ${/[A-Z]/.test(newAgent.password) ? "bi-check-circle-fill" : "bi-circle"} me-2`}></i>
+                    <small
+                      className={`d-flex align-items-center mb-1 ${
+                        /[A-Z]/.test(newAgent.password)
+                          ? "text-success"
+                          : "text-muted"
+                      }`}
+                    >
+                      <i
+                        className={`bi ${/[A-Z]/.test(newAgent.password) ? "bi-check-circle-fill" : "bi-circle"} me-2`}
+                      ></i>
                       Uppercase letter
                     </small>
                   </div>
                   <div className="col-6">
-                    <small className={`d-flex align-items-center mb-1 ${
-                      /[0-9]/.test(newAgent.password) ? "text-success" : "text-muted"
-                    }`}>
-                      <i className={`bi ${/[0-9]/.test(newAgent.password) ? "bi-check-circle-fill" : "bi-circle"} me-2`}></i>
+                    <small
+                      className={`d-flex align-items-center mb-1 ${
+                        /[0-9]/.test(newAgent.password)
+                          ? "text-success"
+                          : "text-muted"
+                      }`}
+                    >
+                      <i
+                        className={`bi ${/[0-9]/.test(newAgent.password) ? "bi-check-circle-fill" : "bi-circle"} me-2`}
+                      ></i>
                       Number
                     </small>
-                    <small className={`d-flex align-items-center mb-1 ${
-                      /[^A-Za-z0-9]/.test(newAgent.password) ? "text-success" : "text-muted"
-                    }`}>
-                      <i className={`bi ${/[^A-Za-z0-9]/.test(newAgent.password) ? "bi-check-circle-fill" : "bi-circle"} me-2`}></i>
+                    <small
+                      className={`d-flex align-items-center mb-1 ${
+                        /[^A-Za-z0-9]/.test(newAgent.password)
+                          ? "text-success"
+                          : "text-muted"
+                      }`}
+                    >
+                      <i
+                        className={`bi ${/[^A-Za-z0-9]/.test(newAgent.password) ? "bi-check-circle-fill" : "bi-circle"} me-2`}
+                      ></i>
                       Special character
                     </small>
                   </div>
@@ -322,7 +380,7 @@ export default function AgentRegister({ onBack }) {
         .agent-registration {
           animation: fadeIn 0.5s ease-in;
         }
-        
+
         @keyframes fadeIn {
           from {
             opacity: 0;
@@ -333,17 +391,18 @@ export default function AgentRegister({ onBack }) {
             transform: translateY(0);
           }
         }
-        
+
         .card {
-          transition: transform 0.3s ease, box-shadow 0.3s ease;
+          transition:
+            transform 0.3s ease,
+            box-shadow 0.3s ease;
         }
-        
+
         .card:hover {
           transform: translateY(-2px);
-          box-shadow: 0 8px 25px rgba(0,0,0,0.1) !important;
+          box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1) !important;
         }
       `}</style>
     </div>
   );
 }
-

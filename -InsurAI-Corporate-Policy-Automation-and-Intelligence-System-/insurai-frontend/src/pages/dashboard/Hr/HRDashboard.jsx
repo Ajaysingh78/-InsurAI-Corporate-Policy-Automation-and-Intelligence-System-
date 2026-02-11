@@ -7,7 +7,7 @@ import "jspdf-autotable";
 import ReportsAnalytics from "./ReportsAnalytics";
 import HRClaims from "./HRClaims";
 import HRPolicies from "./HRPolicies";
-import HREmployees from "./HREmployees"; 
+import HREmployees from "./HREmployees";
 import HRFraud from "./HRFraud";
 import HRNotification from "./HRNotification";
 
@@ -48,14 +48,14 @@ export default function HRDashboard() {
     highPriorityClaims: 0,
     totalCoverageAmount: 0,
     monthlyPremium: 0,
-    fraudRiskScore: 0
+    fraudRiskScore: 0,
   });
 
   const [loading, setLoading] = useState({
     claims: true,
     employees: true,
     policies: true,
-    dashboard: true
+    dashboard: true,
   });
 
   const [notifications, setNotifications] = useState([]);
@@ -79,57 +79,66 @@ export default function HRDashboard() {
   // Enhanced Data Fetching with Error Handling
   const fetchEmployees = useCallback(async () => {
     try {
-      setLoading(prev => ({ ...prev, employees: true }));
-      const response = await fetch("https://ingenious-surprise-production.up.railway.app/auth/employees");
-      if (!response.ok) throw new Error('Failed to fetch employees');
+      setLoading((prev) => ({ ...prev, employees: true }));
+      const response = await fetch(
+        "https://insurai-backend-production.up.railway.app/auth/employees",
+      );
+      if (!response.ok) throw new Error("Failed to fetch employees");
       const data = await response.json();
       setEmployees(Array.isArray(data) ? data : []);
       console.debug("fetchEmployees ->", Array.isArray(data) ? data.length : 0);
       return Array.isArray(data) ? data : [];
     } catch (err) {
       console.error("Error fetching employees:", err);
-      addNotification('error', 'Failed to load employee data', true);
+      addNotification("error", "Failed to load employee data", true);
       return [];
     } finally {
-      setLoading(prev => ({ ...prev, employees: false }));
+      setLoading((prev) => ({ ...prev, employees: false }));
     }
   }, []);
 
   const fetchHRList = useCallback(async () => {
     try {
-      const response = await fetch("https://ingenious-surprise-production.up.railway.app/hr");
-      if (!response.ok) throw new Error('Failed to fetch HR list');
+      const response = await fetch(
+        "https://insurai-backend-production.up.railway.app/hr",
+      );
+      if (!response.ok) throw new Error("Failed to fetch HR list");
       const data = await response.json();
       setHrs(Array.isArray(data) ? data : []);
       return Array.isArray(data) ? data : [];
     } catch (err) {
       console.error("Error fetching HR list:", err);
-      addNotification('error', 'Failed to load HR team data', true);
+      addNotification("error", "Failed to load HR team data", true);
       return [];
     }
   }, []);
 
   const fetchPolicies = useCallback(async () => {
     try {
-      setLoading(prev => ({ ...prev, policies: true }));
+      setLoading((prev) => ({ ...prev, policies: true }));
       const token = localStorage.getItem("token");
-      const response = await fetch("https://ingenious-surprise-production.up.railway.app/employee/policies", {
-        headers: token ? { Authorization: `Bearer ${token}` } : {}
-      });
+      const response = await fetch(
+        "https://insurai-backend-production.up.railway.app/employee/policies",
+        {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        },
+      );
 
       if (!response.ok) {
-        throw new Error('Failed to fetch policies');
+        throw new Error("Failed to fetch policies");
       }
 
       const data = await response.json();
       const policiesArray = Array.isArray(data) ? data : (data?.policies ?? []);
-      const formattedPolicies = policiesArray.map(policy => ({
+      const formattedPolicies = policiesArray.map((policy) => ({
         id: policy.id ?? policy.policyId ?? null,
         policyName: policy.policyName ?? policy.name ?? "Unknown Policy",
         policyType: policy.policyType ?? policy.type ?? "General",
         providerName: policy.providerName ?? policy.provider ?? "Unknown",
-        coverageAmount: Number(policy.coverageAmount ?? policy.coverage ?? 0) || 0,
-        monthlyPremium: Number(policy.monthlyPremium ?? policy.premium ?? 0) || 0,
+        coverageAmount:
+          Number(policy.coverageAmount ?? policy.coverage ?? 0) || 0,
+        monthlyPremium:
+          Number(policy.monthlyPremium ?? policy.premium ?? 0) || 0,
         renewalDate: policy.renewalDate ?? policy.renewal_date ?? null,
         policyStatus: policy.policyStatus ?? policy.status ?? "Unknown",
         policyDescription: policy.policyDescription ?? policy.description ?? "",
@@ -143,41 +152,44 @@ export default function HRDashboard() {
       return formattedPolicies;
     } catch (err) {
       console.error("Error fetching policies:", err);
-      addNotification('error', 'Failed to load policy data', true);
+      addNotification("error", "Failed to load policy data", true);
       return [];
     } finally {
-      setLoading(prev => ({ ...prev, policies: false }));
+      setLoading((prev) => ({ ...prev, policies: false }));
     }
   }, []);
 
   const fetchClaims = useCallback(async () => {
     try {
-      setLoading(prev => ({ ...prev, claims: true }));
+      setLoading((prev) => ({ ...prev, claims: true }));
       const token = localStorage.getItem("token");
       if (!token) {
         navigate("/hr/login");
         return;
       }
 
-      const response = await fetch(`https://ingenious-surprise-production.up.railway.app/hr/claims?hrId=${loggedInHrId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await fetch(
+        `https://insurai-backend-production.up.railway.app/hr/claims?hrId=${loggedInHrId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
 
       if (response.ok) {
         const data = await response.json();
         setPendingClaims(data);
         processEnhancedDashboardStats(data);
-        addNotification('success', `Loaded ${data.length} claims successfully`);
+        addNotification("success", `Loaded ${data.length} claims successfully`);
       } else if (response.status === 403) {
         navigate("/hr/login");
       } else {
-        throw new Error('Failed to fetch claims');
+        throw new Error("Failed to fetch claims");
       }
     } catch (err) {
       console.error("Error fetching claims:", err);
-      addNotification('error', 'Failed to load claim data');
+      addNotification("error", "Failed to load claim data");
     } finally {
-      setLoading(prev => ({ ...prev, claims: false }));
+      setLoading((prev) => ({ ...prev, claims: false }));
     }
   }, [loggedInHrId, navigate]);
 
@@ -188,76 +200,125 @@ export default function HRDashboard() {
   // memoize helpers so stats callback can stay stable
   const calculateFraudRiskScore = useCallback((claims) => {
     if (!Array.isArray(claims) || claims.length === 0) return 0;
-    const highAmountClaims = claims.filter(claim => parseFloat(claim.amount) > 100000).length;
-    const recentClaims = claims.filter(claim => {
+    const highAmountClaims = claims.filter(
+      (claim) => parseFloat(claim.amount) > 100000,
+    ).length;
+    const recentClaims = claims.filter((claim) => {
       const claimDate = new Date(claim.claimDate);
       const daysAgo = (new Date() - claimDate) / (1000 * 60 * 60 * 24);
       return daysAgo < 30;
     }).length;
-    return Math.min(100, Math.round((highAmountClaims / claims.length) * 50 + (recentClaims / claims.length) * 50));
+    return Math.min(
+      100,
+      Math.round(
+        (highAmountClaims / claims.length) * 50 +
+          (recentClaims / claims.length) * 50,
+      ),
+    );
   }, []);
 
   const calculateAverageProcessingTime = useCallback((claims) => {
-    const processedClaims = (Array.isArray(claims) ? claims : []).filter(claim => claim.status !== "Pending");
+    const processedClaims = (Array.isArray(claims) ? claims : []).filter(
+      (claim) => claim.status !== "Pending",
+    );
     if (processedClaims.length === 0) return "0 days";
     const totalProcessingTime = processedClaims.reduce((sum, claim) => {
-      const created = new Date(claim.createdDate || claim.claimDate || Date.now());
+      const created = new Date(
+        claim.createdDate || claim.claimDate || Date.now(),
+      );
       const processed = new Date(claim.processedDate || Date.now());
       return sum + (processed - created);
     }, 0);
-    const avgDays = totalProcessingTime / (processedClaims.length * 1000 * 60 * 60 * 24);
+    const avgDays =
+      totalProcessingTime / (processedClaims.length * 1000 * 60 * 60 * 24);
     return `${avgDays.toFixed(1)} days`;
   }, []);
 
   // stable stats processor using memoizedEmployees/policies
-  const processEnhancedDashboardStats = useCallback((claims) => {
-    const cls = Array.isArray(claims) ? claims : [];
-    const emps = memoizedEmployees || [];
-    const pols = memoizedPolicies || [];
+  const processEnhancedDashboardStats = useCallback(
+    (claims) => {
+      const cls = Array.isArray(claims) ? claims : [];
+      const emps = memoizedEmployees || [];
+      const pols = memoizedPolicies || [];
 
-    const pendingClaims = cls.filter(c => (c.status ?? c.claim_status) === "Pending");
-    const approvedClaims = cls.filter(c => (c.status ?? c.claim_status) === "Approved");
-    const rejectedClaims = cls.filter(c => (c.status ?? c.claim_status) === "Rejected");
+      const pendingClaims = cls.filter(
+        (c) => (c.status ?? c.claim_status) === "Pending",
+      );
+      const approvedClaims = cls.filter(
+        (c) => (c.status ?? c.claim_status) === "Approved",
+      );
+      const rejectedClaims = cls.filter(
+        (c) => (c.status ?? c.claim_status) === "Rejected",
+      );
 
-    const getAmount = c => parseFloat(c.amount ?? c.claim_amount ?? 0) || 0;
-    const totalClaimsAmount = cls.reduce((sum, c) => sum + getAmount(c), 0);
-    const pendingAmount = pendingClaims.reduce((sum, c) => sum + getAmount(c), 0);
+      const getAmount = (c) => parseFloat(c.amount ?? c.claim_amount ?? 0) || 0;
+      const totalClaimsAmount = cls.reduce((sum, c) => sum + getAmount(c), 0);
+      const pendingAmount = pendingClaims.reduce(
+        (sum, c) => sum + getAmount(c),
+        0,
+      );
 
-    const activePolicies = pols.length;
-    const totalCoverageAmount = pols.reduce((sum, p) => sum + (parseFloat(p.coverageAmount ?? p.total_coverage ?? 0) || 0), 0);
+      const activePolicies = pols.length;
+      const totalCoverageAmount = pols.reduce(
+        (sum, p) =>
+          sum + (parseFloat(p.coverageAmount ?? p.total_coverage ?? 0) || 0),
+        0,
+      );
 
-    const totalEmployees = emps.length;
-    const activeEmployees = emps.some(e => typeof e.active !== "undefined") ? emps.filter(e => e.active).length : totalEmployees;
+      const totalEmployees = emps.length;
+      const activeEmployees = emps.some((e) => typeof e.active !== "undefined")
+        ? emps.filter((e) => e.active).length
+        : totalEmployees;
 
-    const approvalRate = cls.length > 0 ? Math.round((approvedClaims.length / cls.length) * 100) : 0;
-    const avgProcessingTime = calculateAverageProcessingTime(cls);
-    const fraudRiskScore = calculateFraudRiskScore(cls);
+      const approvalRate =
+        cls.length > 0
+          ? Math.round((approvedClaims.length / cls.length) * 100)
+          : 0;
+      const avgProcessingTime = calculateAverageProcessingTime(cls);
+      const fraudRiskScore = calculateFraudRiskScore(cls);
 
-    setDashboardStats({
-      pendingClaims: pendingClaims.length,
-      approvedClaims: approvedClaims.length,
-      rejectedClaims: rejectedClaims.length,
-      totalClaimsAmount,
-      pendingAmount,
-      activePolicies,
-      expiringPolicies: 0,
-      activeEmployees,
-      totalEmployees,
-      approvalRate,
-      avgProcessingTime,
-      highPriorityClaims: pendingClaims.filter(c => getAmount(c) > 50000).length,
-      totalCoverageAmount,
-      monthlyPremium: 0,
-      fraudRiskScore,
-    });
-  }, [memoizedEmployees, memoizedPolicies, calculateAverageProcessingTime, calculateFraudRiskScore]);
+      setDashboardStats({
+        pendingClaims: pendingClaims.length,
+        approvedClaims: approvedClaims.length,
+        rejectedClaims: rejectedClaims.length,
+        totalClaimsAmount,
+        pendingAmount,
+        activePolicies,
+        expiringPolicies: 0,
+        activeEmployees,
+        totalEmployees,
+        approvalRate,
+        avgProcessingTime,
+        highPriorityClaims: pendingClaims.filter((c) => getAmount(c) > 50000)
+          .length,
+        totalCoverageAmount,
+        monthlyPremium: 0,
+        fraudRiskScore,
+      });
+    },
+    [
+      memoizedEmployees,
+      memoizedPolicies,
+      calculateAverageProcessingTime,
+      calculateFraudRiskScore,
+    ],
+  );
 
   // only trigger when backend arrays change (use lengths to avoid callback instability)
   useEffect(() => {
-    if (pendingClaims.length > 0 && employees.length > 0 && policies.length > 0) {
+    if (
+      pendingClaims.length > 0 &&
+      employees.length > 0 &&
+      policies.length > 0
+    ) {
       processEnhancedDashboardStats(pendingClaims);
     }
-  }, [pendingClaims, employees.length, policies.length, processEnhancedDashboardStats]);
+  }, [
+    pendingClaims,
+    employees.length,
+    policies.length,
+    processEnhancedDashboardStats,
+  ]);
 
   // Enhanced Notification System
   const addNotification = (type, message, autoClose = true) => {
@@ -267,36 +328,42 @@ export default function HRDashboard() {
       type,
       message,
       timestamp: new Date(),
-      read: false
+      read: false,
     };
 
     // Add the new notification at the start (do not slice unless you want a hard max)
-    setNotifications(prev => [notification, ...prev]);
+    setNotifications((prev) => [notification, ...prev]);
 
     // Auto-remove after 5 seconds (use functional update to avoid stale state)
     if (autoClose) {
       const timer = setTimeout(() => {
-        setNotifications(prev => prev.filter(n => n.id !== id));
+        setNotifications((prev) => prev.filter((n) => n.id !== id));
       }, 5000);
       // optional: store timers if you want to clear on unmount (not strictly required here)
     }
   };
 
   const removeNotification = (id) => {
-    setNotifications(prev => prev.filter(notification => notification.id !== id));
+    setNotifications((prev) =>
+      prev.filter((notification) => notification.id !== id),
+    );
   };
 
   const markAllNotificationsAsRead = () => {
-    setNotifications(prev => prev.map(notification => ({ ...notification, read: true })));
+    setNotifications((prev) =>
+      prev.map((notification) => ({ ...notification, read: true })),
+    );
   };
 
   // Auto-mark notifications as read after 5s to improve UX (cleans up timely)
   useEffect(() => {
     const timers = [];
-    notifications.forEach(n => {
+    notifications.forEach((n) => {
       if (!n.read) {
         const t = setTimeout(() => {
-          setNotifications(prev => prev.map(x => x.id === n.id ? { ...x, read: true } : x));
+          setNotifications((prev) =>
+            prev.map((x) => (x.id === n.id ? { ...x, read: true } : x)),
+          );
         }, 5000);
         timers.push(t);
       }
@@ -307,7 +374,7 @@ export default function HRDashboard() {
   // Enhanced Modal Handlers
   const openViewModal = (claim) => {
     setViewingClaim(claim);
-    addNotification('info', `Viewing claim from ${claim.employeeName}`);
+    addNotification("info", `Viewing claim from ${claim.employeeName}`);
   };
 
   const closeViewModal = () => setViewingClaim(null);
@@ -315,7 +382,7 @@ export default function HRDashboard() {
   const handleView = (employee) => {
     setSelectedEmployee(employee);
     setShowModal(true);
-    addNotification('info', `Viewing employee: ${employee.name}`);
+    addNotification("info", `Viewing employee: ${employee.name}`);
   };
 
   const handleCloseModal = () => {
@@ -324,16 +391,30 @@ export default function HRDashboard() {
   };
 
   const handleEdit = (employee) => {
-    addNotification('warning', `Edit feature coming soon for: ${employee.name}`);
+    addNotification(
+      "warning",
+      `Edit feature coming soon for: ${employee.name}`,
+    );
   };
 
   // Enhanced Claim Mapping
   useEffect(() => {
-    if (pendingClaims.length > 0 && employees.length > 0 && hrs.length > 0 && policies.length > 0) {
-      const updatedClaims = pendingClaims.map(claim => {
-        const employee = employees.find(emp => emp.id === claim.employeeId || claim.employee_id);
-        const hr = hrs.find(hr => hr.id === claim.assignedHrId || claim.assigned_hr_id);
-        const policy = policies.find(p => p.id === claim.policyId || claim.policy_id);
+    if (
+      pendingClaims.length > 0 &&
+      employees.length > 0 &&
+      hrs.length > 0 &&
+      policies.length > 0
+    ) {
+      const updatedClaims = pendingClaims.map((claim) => {
+        const employee = employees.find(
+          (emp) => emp.id === claim.employeeId || claim.employee_id,
+        );
+        const hr = hrs.find(
+          (hr) => hr.id === claim.assignedHrId || claim.assigned_hr_id,
+        );
+        const policy = policies.find(
+          (p) => p.id === claim.policyId || claim.policy_id,
+        );
 
         return {
           ...claim,
@@ -342,10 +423,12 @@ export default function HRDashboard() {
           documents: claim.documents || [],
           assignedHrName: hr?.name || "Not Assigned",
           policyName: policy?.policyName || "N/A",
-          canModify: claim.assignedHrId === loggedInHrId || claim.assigned_hr_id === loggedInHrId,
+          canModify:
+            claim.assignedHrId === loggedInHrId ||
+            claim.assigned_hr_id === loggedInHrId,
           remarks: claim.remarks || "",
           priority: calculateClaimPriority(claim),
-          daysPending: calculateDaysPending(claim)
+          daysPending: calculateDaysPending(claim),
         };
       });
       setMappedClaims(updatedClaims);
@@ -367,112 +450,146 @@ export default function HRDashboard() {
 
   // Enhanced Claim Actions
   const approveClaim = async (id, remarks) => {
-    const claim = mappedClaims.find(c => c.id === id);
+    const claim = mappedClaims.find((c) => c.id === id);
     if (!claim.canModify) {
-      addNotification('error', 'You are not assigned to this claim');
+      addNotification("error", "You are not assigned to this claim");
       return;
     }
-    
+
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch(`https://ingenious-surprise-production.up.railway.app/hr/claims/approve/${id}`, {
-        method: "POST",
-        headers: { 
-          "Authorization": `Bearer ${token}`,
-          "Content-Type": "application/json"
+      const response = await fetch(
+        `https://insurai-backend-production.up.railway.app/hr/claims/approve/${id}`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ remarks }),
         },
-        body: JSON.stringify({ remarks })
-      });
-      
+      );
+
       if (response.ok) {
         const updatedClaim = await response.json();
-        const hr = hrs.find(hr => hr.id === updatedClaim.assignedHrId);
-        const policy = policies.find(p => p.id === updatedClaim.policyId);
-        
-        setMappedClaims(prev =>
-          prev.map(c => (c.id === id ? {
-            ...updatedClaim,
-            employeeName: employees.find(emp => emp.id === updatedClaim.employeeId)?.name || "Unknown",
-            employeeIdDisplay: employees.find(emp => emp.id === updatedClaim.employeeId)?.employeeId || "N/A",
-            documents: updatedClaim.documents || [],
-            assignedHrName: hr?.name || "Not Assigned",
-            policyName: policy?.policyName || "N/A",
-            canModify: updatedClaim.assignedHrId === loggedInHrId,
-            remarks: updatedClaim.remarks || ""
-          } : c))
+        const hr = hrs.find((hr) => hr.id === updatedClaim.assignedHrId);
+        const policy = policies.find((p) => p.id === updatedClaim.policyId);
+
+        setMappedClaims((prev) =>
+          prev.map((c) =>
+            c.id === id
+              ? {
+                  ...updatedClaim,
+                  employeeName:
+                    employees.find((emp) => emp.id === updatedClaim.employeeId)
+                      ?.name || "Unknown",
+                  employeeIdDisplay:
+                    employees.find((emp) => emp.id === updatedClaim.employeeId)
+                      ?.employeeId || "N/A",
+                  documents: updatedClaim.documents || [],
+                  assignedHrName: hr?.name || "Not Assigned",
+                  policyName: policy?.policyName || "N/A",
+                  canModify: updatedClaim.assignedHrId === loggedInHrId,
+                  remarks: updatedClaim.remarks || "",
+                }
+              : c,
+          ),
         );
-        
-        addNotification('success', `Claim approved successfully for ${claim.employeeName}`);
+
+        addNotification(
+          "success",
+          `Claim approved successfully for ${claim.employeeName}`,
+        );
         fetchClaims(); // Refresh claims data
       } else {
-        throw new Error('Failed to approve claim');
+        throw new Error("Failed to approve claim");
       }
     } catch (err) {
       console.error("Error approving claim:", err);
-      addNotification('error', 'Failed to approve claim');
+      addNotification("error", "Failed to approve claim");
     }
   };
 
   const rejectClaim = async (id, remarks) => {
-    const claim = mappedClaims.find(c => c.id === id);
+    const claim = mappedClaims.find((c) => c.id === id);
     if (!claim.canModify) {
-      addNotification('error', 'You are not assigned to this claim');
+      addNotification("error", "You are not assigned to this claim");
       return;
     }
-    
+
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch(`https://ingenious-surprise-production.up.railway.app/hr/claims/reject/${id}`, {
-        method: "POST",
-        headers: { 
-          "Authorization": `Bearer ${token}`,
-          "Content-Type": "application/json"
+      const response = await fetch(
+        `https://insurai-backend-production.up.railway.app/hr/claims/reject/${id}`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ remarks }),
         },
-        body: JSON.stringify({ remarks })
-      });
-      
+      );
+
       if (response.ok) {
         const updatedClaim = await response.json();
-        const hr = hrs.find(hr => hr.id === updatedClaim.assignedHrId);
-        const policy = policies.find(p => p.id === updatedClaim.policyId);
-        
-        setMappedClaims(prev =>
-          prev.map(c => (c.id === id ? {
-            ...updatedClaim,
-            employeeName: employees.find(emp => emp.id === updatedClaim.employeeId)?.name || "Unknown",
-            employeeIdDisplay: employees.find(emp => emp.id === updatedClaim.employeeId)?.employeeId || "N/A",
-            documents: updatedClaim.documents || [],
-            assignedHrName: hr?.name || "Not Assigned",
-            policyName: policy?.policyName || "N/A",
-            canModify: updatedClaim.assignedHrId === loggedInHrId,
-            remarks: updatedClaim.remarks || ""
-          } : c))
+        const hr = hrs.find((hr) => hr.id === updatedClaim.assignedHrId);
+        const policy = policies.find((p) => p.id === updatedClaim.policyId);
+
+        setMappedClaims((prev) =>
+          prev.map((c) =>
+            c.id === id
+              ? {
+                  ...updatedClaim,
+                  employeeName:
+                    employees.find((emp) => emp.id === updatedClaim.employeeId)
+                      ?.name || "Unknown",
+                  employeeIdDisplay:
+                    employees.find((emp) => emp.id === updatedClaim.employeeId)
+                      ?.employeeId || "N/A",
+                  documents: updatedClaim.documents || [],
+                  assignedHrName: hr?.name || "Not Assigned",
+                  policyName: policy?.policyName || "N/A",
+                  canModify: updatedClaim.assignedHrId === loggedInHrId,
+                  remarks: updatedClaim.remarks || "",
+                }
+              : c,
+          ),
         );
-        
-        addNotification('warning', `Claim rejected for ${claim.employeeName}`);
+
+        addNotification("warning", `Claim rejected for ${claim.employeeName}`);
         fetchClaims(); // Refresh claims data
       } else {
-        throw new Error('Failed to reject claim');
+        throw new Error("Failed to reject claim");
       }
     } catch (err) {
       console.error("Error rejecting claim:", err);
-      addNotification('error', 'Failed to reject claim');
+      addNotification("error", "Failed to reject claim");
     }
   };
 
   // Enhanced Data Export Functions
   const downloadCSV = () => {
     if (!displayedClaims.length) {
-      addNotification('warning', 'No claims available to download');
+      addNotification("warning", "No claims available to download");
       return;
     }
 
     const headers = [
-      "Employee Name", "Employee ID", "Claim Type", "Amount", "Date",
-      "Status", "Policy Name", "Remarks", "Priority", "Days Pending", "Documents"
+      "Employee Name",
+      "Employee ID",
+      "Claim Type",
+      "Amount",
+      "Date",
+      "Status",
+      "Policy Name",
+      "Remarks",
+      "Priority",
+      "Days Pending",
+      "Documents",
     ];
 
-    const rows = displayedClaims.map(c => [
+    const rows = displayedClaims.map((c) => [
       c.employeeName,
       c.employeeIdDisplay,
       c.title,
@@ -483,38 +600,42 @@ export default function HRDashboard() {
       c.remarks || "",
       c.priority,
       c.daysPending,
-      c.documents?.length > 0 ? c.documents.map(d => `https://ingenious-surprise-production.up.railway.app${d}`).join(" | ") : "No documents"
+      c.documents?.length > 0
+        ? c.documents
+            .map((d) => `https://insurai-backend-production.up.railway.app${d}`)
+            .join(" | ")
+        : "No documents",
     ]);
 
-    const csvContent = [headers, ...rows].map(e => e.join(",")).join("\n");
+    const csvContent = [headers, ...rows].map((e) => e.join(",")).join("\n");
     const blob = new Blob([csvContent], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `claims_export_${new Date().toISOString().split('T')[0]}.csv`;
+    a.download = `claims_export_${new Date().toISOString().split("T")[0]}.csv`;
     a.click();
     URL.revokeObjectURL(url);
-    addNotification('success', 'CSV export completed successfully');
+    addNotification("success", "CSV export completed successfully");
   };
 
   const downloadPDF = () => {
     if (!displayedClaims.length) {
-      addNotification('warning', 'No claims available to download');
+      addNotification("warning", "No claims available to download");
       return;
     }
 
     const doc = new jsPDF();
-    
+
     // Add header with theme colors
     doc.setFontSize(16);
     doc.setTextColor(22, 4, 63); // #16043f
-    doc.text('Claims Report - InsurAI Enterprise', 14, 15);
+    doc.text("Claims Report - InsurAI Enterprise", 14, 15);
     doc.setFontSize(10);
     doc.setTextColor(100, 100, 100);
     doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 14, 22);
     doc.text(`Total Claims: ${displayedClaims.length}`, 14, 28);
 
-    const rows = displayedClaims.map(c => [
+    const rows = displayedClaims.map((c) => [
       c.employeeName,
       c.employeeIdDisplay,
       c.title,
@@ -523,26 +644,36 @@ export default function HRDashboard() {
       c.status,
       c.policyName,
       c.priority,
-      c.daysPending
+      c.daysPending,
     ]);
 
     doc.autoTable({
-      head: [[
-        "Employee", "ID", "Type", "Amount", "Date", "Status", "Policy", "Priority", "Days"
-      ]],
+      head: [
+        [
+          "Employee",
+          "ID",
+          "Type",
+          "Amount",
+          "Date",
+          "Status",
+          "Policy",
+          "Priority",
+          "Days",
+        ],
+      ],
       body: rows,
       startY: 35,
       theme: "grid",
-      headStyles: { 
+      headStyles: {
         fillColor: [22, 4, 63], // #16043f
         textColor: 255,
-        fontStyle: 'bold'
+        fontStyle: "bold",
       },
       styles: {
         fontSize: 8,
         cellPadding: 2,
-        overflow: 'linebreak',
-        halign: 'center',
+        overflow: "linebreak",
+        halign: "center",
       },
       columnStyles: {
         0: { cellWidth: 20 },
@@ -553,37 +684,39 @@ export default function HRDashboard() {
         5: { cellWidth: 15 },
         6: { cellWidth: 25 },
         7: { cellWidth: 12 },
-        8: { cellWidth: 12 }
+        8: { cellWidth: 12 },
       },
-      margin: { left: 10, right: 10 }
+      margin: { left: 10, right: 10 },
     });
 
-    doc.save(`claims_report_${new Date().toISOString().split('T')[0]}.pdf`);
-    addNotification('success', 'PDF report generated successfully');
+    doc.save(`claims_report_${new Date().toISOString().split("T")[0]}.pdf`);
+    addNotification("success", "PDF report generated successfully");
   };
 
   // Enhanced Filtering
-  const filteredEmployees = employees.filter(emp => {
-    const matchesName = emp.name?.toLowerCase().includes(searchName.toLowerCase());
+  const filteredEmployees = employees.filter((emp) => {
+    const matchesName = emp.name
+      ?.toLowerCase()
+      .includes(searchName.toLowerCase());
     const matchesPolicy = policyFilter === "" || emp.role === policyFilter;
     return matchesName && matchesPolicy;
   });
 
-  const displayedClaims = mappedClaims.filter(claim =>
-    statusFilter === "All" ? true : claim.status === statusFilter
+  const displayedClaims = mappedClaims.filter((claim) =>
+    statusFilter === "All" ? true : claim.status === statusFilter,
   );
 
   // Enhanced Initialization
   useEffect(() => {
     const initializeDashboard = async () => {
-      setLoading(prev => ({ ...prev, dashboard: true }));
+      setLoading((prev) => ({ ...prev, dashboard: true }));
       await Promise.all([
         fetchEmployees(),
         fetchHRList(),
         fetchPolicies(),
-        fetchClaims()
+        fetchClaims(),
       ]);
-      setLoading(prev => ({ ...prev, dashboard: false }));
+      setLoading((prev) => ({ ...prev, dashboard: false }));
       // removed addNotification('success', 'Dashboard initialized successfully');
     };
 
@@ -592,9 +725,9 @@ export default function HRDashboard() {
 
   // Enhanced Logout with Confirmation
   const handleLogout = () => {
-    if (window.confirm('Are you sure you want to logout?')) {
+    if (window.confirm("Are you sure you want to logout?")) {
       localStorage.clear();
-      addNotification('info', 'Logged out successfully');
+      addNotification("info", "Logged out successfully");
       navigate("/hr/login");
     }
   };
@@ -606,10 +739,11 @@ export default function HRDashboard() {
     if (abs >= 1e7) return `₹${(amount / 1e7).toFixed(2)} Cr`;
     if (abs >= 1e5) return `₹${(amount / 1e5).toFixed(2)} L`;
     if (abs >= 1000) return `₹${(amount / 1000).toFixed(0)}K`;
-    return `₹${amount.toLocaleString('en-IN')}`;
+    return `₹${amount.toLocaleString("en-IN")}`;
   };
 
-  const formatPercent = (v) => (v == null || isNaN(v) ? "0%" : `${Math.round(v)}%`);
+  const formatPercent = (v) =>
+    v == null || isNaN(v) ? "0%" : `${Math.round(v)}%`;
 
   // Enhanced Home Tab Render with Advanced Features
   const renderEnhancedHomeContent = () => {
@@ -618,24 +752,31 @@ export default function HRDashboard() {
         <div className="container-fluid">
           <div className="row justify-content-center">
             <div className="col-12 text-center py-5">
-              <div className="spinner-border text-primary" style={{width: '3rem', height: '3rem'}}>
+              <div
+                className="spinner-border text-primary"
+                style={{ width: "3rem", height: "3rem" }}
+              >
                 <span className="visually-hidden">Loading...</span>
               </div>
-              <p className="mt-3 text-muted">Initializing Enterprise Dashboard...</p>
+              <p className="mt-3 text-muted">
+                Initializing Enterprise Dashboard...
+              </p>
             </div>
           </div>
         </div>
       );
     }
 
-    const highPriorityClaims = mappedClaims.filter(claim => claim.priority === "High");
-    const recentActivities = mappedClaims.slice(0, 10).map(claim => ({
+    const highPriorityClaims = mappedClaims.filter(
+      (claim) => claim.priority === "High",
+    );
+    const recentActivities = mappedClaims.slice(0, 10).map((claim) => ({
       id: claim.id,
-      type: 'claim',
+      type: "claim",
       title: `New claim from ${claim.employeeName}`,
       description: `${claim.title} - ₹${claim.amount}`,
       timestamp: claim.claimDate,
-      priority: claim.priority
+      priority: claim.priority,
     }));
 
     return (
@@ -645,7 +786,9 @@ export default function HRDashboard() {
           <div className="col-12">
             <div className="d-flex justify-content-between align-items-start">
               <div>
-                <h2 className="fw-bold mb-2 theme-font-color">Enterprise HR Dashboard</h2>
+                <h2 className="fw-bold mb-2 theme-font-color">
+                  Enterprise HR Dashboard
+                </h2>
                 <div className="d-flex align-items-center gap-3">
                   <span className="text-muted">
                     <i className="bi bi-building me-1"></i>
@@ -660,10 +803,15 @@ export default function HRDashboard() {
               <div className="text-end">
                 <div className="bg-light rounded p-3 border">
                   <div className="fw-bold theme-font-color">
-                    {new Date().toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                    {new Date().toLocaleDateString("en-IN", {
+                      weekday: "long",
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })}
                   </div>
                   <small className="text-muted">
-                    Last updated: {new Date().toLocaleTimeString('en-IN')}
+                    Last updated: {new Date().toLocaleTimeString("en-IN")}
                   </small>
                 </div>
               </div>
@@ -689,9 +837,15 @@ export default function HRDashboard() {
                       <div className="card-body">
                         <div className="d-flex justify-content-between align-items-start">
                           <div>
-                            <h6 className="text-primary mb-2">Total Coverage</h6>
-                            <h3 className="text-primary mb-1">{formatINR(dashboardStats.totalCoverageAmount)}</h3>
-                            <small className="text-muted">Active policies coverage</small>
+                            <h6 className="text-primary mb-2">
+                              Total Coverage
+                            </h6>
+                            <h3 className="text-primary mb-1">
+                              {formatINR(dashboardStats.totalCoverageAmount)}
+                            </h3>
+                            <small className="text-muted">
+                              Active policies coverage
+                            </small>
                           </div>
                           <div className="bg-primary bg-opacity-25 rounded p-2">
                             <i className="bi bi-shield-check text-primary fs-5"></i>
@@ -707,9 +861,15 @@ export default function HRDashboard() {
                       <div className="card-body">
                         <div className="d-flex justify-content-between align-items-start">
                           <div>
-                            <h6 className="text-warning mb-2">Pending Amount</h6>
-                            <h3 className="text-warning mb-1">{formatINR(dashboardStats.pendingAmount)}</h3>
-                            <small className="text-muted">{dashboardStats.pendingClaims || 0} claims pending</small>
+                            <h6 className="text-warning mb-2">
+                              Pending Amount
+                            </h6>
+                            <h3 className="text-warning mb-1">
+                              {formatINR(dashboardStats.pendingAmount)}
+                            </h3>
+                            <small className="text-muted">
+                              {dashboardStats.pendingClaims || 0} claims pending
+                            </small>
                           </div>
                           <div className="bg-warning bg-opacity-25 rounded p-2">
                             <i className="bi bi-clock-history text-warning fs-5"></i>
@@ -726,8 +886,12 @@ export default function HRDashboard() {
                         <div className="d-flex justify-content-between align-items-start">
                           <div>
                             <h6 className="text-danger mb-2">Fraud Risk</h6>
-                            <h3 className="text-danger mb-1">{formatPercent(dashboardStats.fraudRiskScore)}</h3>
-                            <small className="text-muted">Risk assessment score</small>
+                            <h3 className="text-danger mb-1">
+                              {formatPercent(dashboardStats.fraudRiskScore)}
+                            </h3>
+                            <small className="text-muted">
+                              Risk assessment score
+                            </small>
                           </div>
                           <div className="bg-danger bg-opacity-25 rounded p-2">
                             <i className="bi bi-shield-exclamation text-danger fs-5"></i>
@@ -744,8 +908,12 @@ export default function HRDashboard() {
                         <div className="d-flex justify-content-between align-items-start">
                           <div>
                             <h6 className="text-success mb-2">Approval Rate</h6>
-                            <h3 className="text-success mb-1">{formatPercent(dashboardStats.approvalRate)}</h3>
-                            <small className="text-muted">Claim processing efficiency</small>
+                            <h3 className="text-success mb-1">
+                              {formatPercent(dashboardStats.approvalRate)}
+                            </h3>
+                            <small className="text-muted">
+                              Claim processing efficiency
+                            </small>
                           </div>
                           <div className="bg-success bg-opacity-25 rounded p-2">
                             <i className="bi bi-graph-up-arrow text-success fs-5"></i>
@@ -754,7 +922,6 @@ export default function HRDashboard() {
                       </div>
                     </div>
                   </div>
-
                 </div>
               </div>
             </div>
@@ -782,7 +949,7 @@ export default function HRDashboard() {
                       description: `${dashboardStats.pendingClaims} pending`,
                       color: "primary",
                       tab: "claims",
-                      count: dashboardStats.pendingClaims
+                      count: dashboardStats.pendingClaims,
                     },
                     {
                       icon: "bi-shield-check",
@@ -790,7 +957,7 @@ export default function HRDashboard() {
                       description: `${dashboardStats.activePolicies} active`,
                       color: "success",
                       tab: "policies",
-                      count: dashboardStats.activePolicies
+                      count: dashboardStats.activePolicies,
                     },
                     {
                       icon: "bi-people",
@@ -798,42 +965,54 @@ export default function HRDashboard() {
                       description: `${dashboardStats.activeEmployees} active`,
                       color: "info",
                       tab: "employees",
-                      count: dashboardStats.activeEmployees
+                      count: dashboardStats.activeEmployees,
                     },
                     {
                       icon: "bi-graph-up",
                       label: "Analytics",
                       description: "View reports",
                       color: "warning",
-                      tab: "reports"
+                      tab: "reports",
                     },
                     {
                       icon: "bi-shield-exclamation",
                       label: "Fraud Monitoring",
                       description: "Risk management",
                       color: "danger",
-                      tab: "fraud"
+                      tab: "fraud",
                     },
                     {
                       icon: "bi-file-earmark-spreadsheet",
                       label: "Export Data",
                       description: "CSV/PDF reports",
                       color: "secondary",
-                      action: downloadCSV
-                    }
+                      action: downloadCSV,
+                    },
                   ].map((action, index) => (
                     <div key={index} className="col-xl-4 col-md-6">
                       <button
                         className={`btn btn-outline-${action.color} w-100 h-100 p-3 text-start quick-action-btn`}
-                        onClick={() => action.tab ? setActiveTab(action.tab) : action.action?.()}
+                        onClick={() =>
+                          action.tab
+                            ? setActiveTab(action.tab)
+                            : action.action?.()
+                        }
                       >
                         <div className="d-flex align-items-center">
-                          <div className={`bg-${action.color} bg-opacity-10 rounded p-2 me-3`}>
-                            <i className={`${action.icon} text-${action.color} fs-5`}></i>
+                          <div
+                            className={`bg-${action.color} bg-opacity-10 rounded p-2 me-3`}
+                          >
+                            <i
+                              className={`${action.icon} text-${action.color} fs-5`}
+                            ></i>
                           </div>
                           <div className="flex-grow-1">
-                            <div className="fw-bold text-dark">{action.label}</div>
-                            <small className="text-muted">{action.description}</small>
+                            <div className="fw-bold text-dark">
+                              {action.label}
+                            </div>
+                            <small className="text-muted">
+                              {action.description}
+                            </small>
                           </div>
                           {action.count > 0 && (
                             <span className={`badge bg-${action.color} ms-2`}>
@@ -861,25 +1040,53 @@ export default function HRDashboard() {
               <div className="card-body">
                 <div className="list-group list-group-flush">
                   {[
-                    { service: 'Claims API', status: 'operational', icon: 'bi-check-circle' },
-                    { service: 'Employee Database', status: 'operational', icon: 'bi-check-circle' },
-                    { service: 'Policy Management', status: 'operational', icon: 'bi-check-circle' },
-                    { service: 'Document Storage', status: 'operational', icon: 'bi-check-circle' },
-                    { service: 'Analytics Engine', status: 'operational', icon: 'bi-check-circle' }
+                    {
+                      service: "Claims API",
+                      status: "operational",
+                      icon: "bi-check-circle",
+                    },
+                    {
+                      service: "Employee Database",
+                      status: "operational",
+                      icon: "bi-check-circle",
+                    },
+                    {
+                      service: "Policy Management",
+                      status: "operational",
+                      icon: "bi-check-circle",
+                    },
+                    {
+                      service: "Document Storage",
+                      status: "operational",
+                      icon: "bi-check-circle",
+                    },
+                    {
+                      service: "Analytics Engine",
+                      status: "operational",
+                      icon: "bi-check-circle",
+                    },
                   ].map((service, index) => (
-                    <div key={index} className="list-group-item d-flex justify-content-between align-items-center border-0 px-0">
+                    <div
+                      key={index}
+                      className="list-group-item d-flex justify-content-between align-items-center border-0 px-0"
+                    >
                       <div>
-                        <i className={`${service.icon} theme-icon-success me-2`}></i>
+                        <i
+                          className={`${service.icon} theme-icon-success me-2`}
+                        ></i>
                         {service.service}
                       </div>
-                      <span className="badge theme-badge-success">Operational</span>
+                      <span className="badge theme-badge-success">
+                        Operational
+                      </span>
                     </div>
                   ))}
                 </div>
                 <div className="mt-3 p-3 bg-light rounded">
                   <small className="text-muted">
                     <i className="bi bi-info-circle me-1"></i>
-                    All systems running optimally. Last checked: {new Date().toLocaleTimeString('en-IN')}
+                    All systems running optimally. Last checked:{" "}
+                    {new Date().toLocaleTimeString("en-IN")}
                   </small>
                 </div>
               </div>
@@ -898,8 +1105,12 @@ export default function HRDashboard() {
                   Recent Claims Activity
                 </h5>
                 <div>
-                  <span className="badge bg-warning me-2">{dashboardStats.pendingClaims} Pending</span>
-                  <span className="badge theme-badge">₹{(dashboardStats.pendingAmount/1000).toFixed(0)}K</span>
+                  <span className="badge bg-warning me-2">
+                    {dashboardStats.pendingClaims} Pending
+                  </span>
+                  <span className="badge theme-badge">
+                    ₹{(dashboardStats.pendingAmount / 1000).toFixed(0)}K
+                  </span>
                 </div>
               </div>
               <div className="card-body">
@@ -926,44 +1137,70 @@ export default function HRDashboard() {
                                   <i className="bi bi-person text-primary"></i>
                                 </div>
                                 <div>
-                                  <div className="fw-bold">{claim.employeeName}</div>
-                                  <small className="text-muted">ID: {claim.employeeIdDisplay}</small>
+                                  <div className="fw-bold">
+                                    {claim.employeeName}
+                                  </div>
+                                  <small className="text-muted">
+                                    ID: {claim.employeeIdDisplay}
+                                  </small>
                                 </div>
                               </div>
                             </td>
                             <td>
                               <div>{claim.title}</div>
-                              <small className="text-muted">{claim.policyName}</small>
+                              <small className="text-muted">
+                                {claim.policyName}
+                              </small>
                             </td>
-                            <td className="fw-bold text-primary">₹{claim.amount}</td>
+                            <td className="fw-bold text-primary">
+                              ₹{claim.amount}
+                            </td>
                             <td>
-                              <span className={`badge ${
-                                claim.priority === "High" ? "bg-danger" :
-                                claim.priority === "Medium" ? "bg-warning" : "bg-info"
-                              }`}>
+                              <span
+                                className={`badge ${
+                                  claim.priority === "High"
+                                    ? "bg-danger"
+                                    : claim.priority === "Medium"
+                                      ? "bg-warning"
+                                      : "bg-info"
+                                }`}
+                              >
                                 {claim.priority}
                               </span>
                             </td>
                             <td>
-                              <span className={`badge ${
-                                claim.daysPending > 7 ? "bg-danger" : 
-                                claim.daysPending > 3 ? "bg-warning" : "bg-success"
-                              }`}>
+                              <span
+                                className={`badge ${
+                                  claim.daysPending > 7
+                                    ? "bg-danger"
+                                    : claim.daysPending > 3
+                                      ? "bg-warning"
+                                      : "bg-success"
+                                }`}
+                              >
                                 {claim.daysPending}d
                               </span>
                             </td>
                             <td>
-                              <span className={`badge ${
-                                claim.status === "Pending" ? "bg-warning" : 
-                                claim.status === "Approved" ? "bg-success" : "bg-danger"
-                              }`}>
+                              <span
+                                className={`badge ${
+                                  claim.status === "Pending"
+                                    ? "bg-warning"
+                                    : claim.status === "Approved"
+                                      ? "bg-success"
+                                      : "bg-danger"
+                                }`}
+                              >
                                 {claim.status}
                               </span>
                             </td>
                             <td>
-                              <button 
+                              <button
                                 className="btn btn-sm btn-outline-primary"
-                                onClick={() => { openViewModal(claim); setActiveTab("claims"); }}
+                                onClick={() => {
+                                  openViewModal(claim);
+                                  setActiveTab("claims");
+                                }}
                               >
                                 Review
                               </button>
@@ -976,11 +1213,13 @@ export default function HRDashboard() {
                 ) : (
                   <div className="text-center py-4">
                     <i className="bi bi-check-circle display-4 text-success"></i>
-                    <p className="text-muted mt-3">No pending claims! All caught up.</p>
+                    <p className="text-muted mt-3">
+                      No pending claims! All caught up.
+                    </p>
                   </div>
                 )}
                 <div className="text-center mt-3">
-                  <button 
+                  <button
                     className="btn theme-btn-primary"
                     onClick={() => setActiveTab("claims")}
                   >
@@ -1008,9 +1247,15 @@ export default function HRDashboard() {
                       <div>
                         <strong>Policy Renewal Required</strong>
                         <br />
-                        <small>{dashboardStats.expiringPolicies} policies expiring in next 30 days</small>
+                        <small>
+                          {dashboardStats.expiringPolicies} policies expiring in
+                          next 30 days
+                        </small>
                         <div className="mt-1">
-                          <button className="btn btn-sm btn-outline-warning" onClick={() => setActiveTab("policies")}>
+                          <button
+                            className="btn btn-sm btn-outline-warning"
+                            onClick={() => setActiveTab("policies")}
+                          >
                             Review Policies
                           </button>
                         </div>
@@ -1024,9 +1269,15 @@ export default function HRDashboard() {
                       <div>
                         <strong>High Priority Claims</strong>
                         <br />
-                        <small>{dashboardStats.highPriorityClaims} claims require immediate attention</small>
+                        <small>
+                          {dashboardStats.highPriorityClaims} claims require
+                          immediate attention
+                        </small>
                         <div className="mt-1">
-                          <button className="btn btn-sm btn-outline-danger" onClick={() => setActiveTab("claims")}>
+                          <button
+                            className="btn btn-sm btn-outline-danger"
+                            onClick={() => setActiveTab("claims")}
+                          >
                             Review Now
                           </button>
                         </div>
@@ -1040,9 +1291,15 @@ export default function HRDashboard() {
                       <div>
                         <strong>High Fraud Risk Detected</strong>
                         <br />
-                        <small>Risk score: {dashboardStats.fraudRiskScore}% - Review suspicious claims</small>
+                        <small>
+                          Risk score: {dashboardStats.fraudRiskScore}% - Review
+                          suspicious claims
+                        </small>
                         <div className="mt-1">
-                          <button className="btn btn-sm btn-outline-dark" onClick={() => setActiveTab("fraud")}>
+                          <button
+                            className="btn btn-sm btn-outline-dark"
+                            onClick={() => setActiveTab("fraud")}
+                          >
                             Investigate
                           </button>
                         </div>
@@ -1111,7 +1368,9 @@ export default function HRDashboard() {
       case "fraud":
         return <HRFraud />;
       case "reports":
-        return <ReportsAnalytics mappedClaims={mappedClaims} policies={policies} />;
+        return (
+          <ReportsAnalytics mappedClaims={mappedClaims} policies={policies} />
+        );
       case "notifications":
         return <HRNotification currentHrId={loggedInHrId} />;
       default:
@@ -1119,125 +1378,192 @@ export default function HRDashboard() {
     }
   };
 
- return (
-  <div className="hr-dashboard enterprise-dashboard">
-    {/* Enhanced Notification System */}
-    <div className="notification-container position-fixed top-0 end-0 p-3" style={{ zIndex: 9999 }}>
-      {notifications.map((notification) => (
-        <div
-          key={notification.id}
-          className={`alert alert-${notification.type} alert-dismissible fade show mb-2 shadow`}
-          style={{ minWidth: '300px' }}
-        >
-          <div className="d-flex align-items-center">
-            <i
-              className={`bi ${
-                notification.type === 'success'
-                  ? 'bi-check-circle'
-                  : notification.type === 'error'
-                  ? 'bi-exclamation-circle'
-                  : notification.type === 'warning'
-                  ? 'bi-exclamation-triangle'
-                  : 'bi-info-circle'
-              } me-2`}
-            ></i>
-            <div className="flex-grow-1">{notification.message}</div>
-          </div>
-          <button type="button" className="btn-close" onClick={() => removeNotification(notification.id)}></button>
-        </div>
-      ))}
-    </div>
-
-    {/* Enhanced Header */}
-    <header className="dashboard-header text-white py-3">
-      <div className="container-fluid">
-        <div className="row align-items-center">
-          <div className="col-md-6 d-flex align-items-center">
-            {/* Hamburger button for mobile */}
+  return (
+    <div className="hr-dashboard enterprise-dashboard">
+      {/* Enhanced Notification System */}
+      <div
+        className="notification-container position-fixed top-0 end-0 p-3"
+        style={{ zIndex: 9999 }}
+      >
+        {notifications.map((notification) => (
+          <div
+            key={notification.id}
+            className={`alert alert-${notification.type} alert-dismissible fade show mb-2 shadow`}
+            style={{ minWidth: "300px" }}
+          >
+            <div className="d-flex align-items-center">
+              <i
+                className={`bi ${
+                  notification.type === "success"
+                    ? "bi-check-circle"
+                    : notification.type === "error"
+                      ? "bi-exclamation-circle"
+                      : notification.type === "warning"
+                        ? "bi-exclamation-triangle"
+                        : "bi-info-circle"
+                } me-2`}
+              ></i>
+              <div className="flex-grow-1">{notification.message}</div>
+            </div>
             <button
-              className="btn d-md-none me-3"
-              onClick={() =>
-                document.querySelector('.dashboard-sidebar').classList.toggle('show')
-              }
-            >
-              <i className="bi bi-list fs-3 text-white"></i>
-            </button>
-
-            <div className="brand-logo me-3">
-              <i className="bi bi-shield-check fs-2 text-white"></i>
-            </div>
-            <div>
-              <h2 className="mb-0 fw-bold">InsurAI HR Portal</h2>
-              <small className="text-light opacity-75">HR Management Portal v2.0</small>
-            </div>
+              type="button"
+              className="btn-close"
+              onClick={() => removeNotification(notification.id)}
+            ></button>
           </div>
-
-          <div className="col-md-6 text-end d-flex align-items-center justify-content-end gap-4">
-            <div className="text-end">
-              <div className="fw-bold">{localStorage.getItem('hrName') || 'HR Administrator'}</div>
-              <small className="text-light opacity-75">
-                <i className="bi bi-building me-1"></i> Corporate Account
-              </small>
-            </div>
-            <div className="vr bg-light opacity-50" style={{ height: '30px' }}></div>
-            <button className="btn btn-outline-light btn-sm" onClick={handleLogout}>
-              <i className="bi bi-box-arrow-right me-2"></i> Logout
-            </button>
-          </div>
-        </div>
+        ))}
       </div>
-    </header>
 
-    {/* Enhanced Main Layout */}
-    <div className="dashboard-main d-flex">
-      {/* Enhanced Sidebar */}
-      <aside className="dashboard-sidebar bg-light border-end">
-        <nav className="nav flex-column p-3">
-          {[
-            { id: 'home', icon: 'bi-speedometer2', label: 'Dashboard', badge: null },
-            { id: 'claims', icon: 'bi-file-earmark-check', label: 'Claim Approval', badge: dashboardStats.pendingClaims },
-            { id: 'policies', icon: 'bi-card-list', label: 'Policy Management', badge: dashboardStats.activePolicies },
-            { id: 'employees', icon: 'bi-people', label: 'Employee Portal', badge: dashboardStats.activeEmployees },
-            { id: 'fraud', icon: 'bi-shield-exclamation', label: 'Fraud Monitoring', badge: dashboardStats.fraudRiskScore > 70 ? '!' : null },
-            { id: 'reports', icon: 'bi-graph-up', label: 'Analytics', badge: null },
-            { id: 'notifications', icon: 'bi-bell', label: 'Notifications', badge: notifications.filter((n) => !n.read).length },
-          ].map((item) => (
-            <a
-              key={item.id}
-              href="#"
-              className={`nav-link sidebar-link ${activeTab === item.id ? 'active' : ''}`}
-              onClick={(e) => {
-                e.preventDefault();
-                setActiveTab(item.id);
-                // Auto-close sidebar on mobile
-                document.querySelector('.dashboard-sidebar').classList.remove('show');
-              }}
-            >
-              <i className={`${item.icon} me-3`}></i>
-              {item.label}
-              {item.badge !== null && item.badge > 0 && <span className="badge theme-badge-danger ms-auto">{item.badge}</span>}
-              {item.badge === '!' && <span className="badge theme-badge-warning ms-auto">!</span>}
-            </a>
-          ))}
-        </nav>
+      {/* Enhanced Header */}
+      <header className="dashboard-header text-white py-3">
+        <div className="container-fluid">
+          <div className="row align-items-center">
+            <div className="col-md-6 d-flex align-items-center">
+              {/* Hamburger button for mobile */}
+              <button
+                className="btn d-md-none me-3"
+                onClick={() =>
+                  document
+                    .querySelector(".dashboard-sidebar")
+                    .classList.toggle("show")
+                }
+              >
+                <i className="bi bi-list fs-3 text-white"></i>
+              </button>
 
-        {/* Sidebar Footer */}
-        <div className="sidebar-footer p-3 border-top">
-          <div className="d-flex align-items-center mb-2">
-            <div className="bg-success rounded-circle p-1 me-2">
-              <i className="bi bi-circle-fill text-success" style={{ fontSize: '8px' }}></i>
+              <div className="brand-logo me-3">
+                <i className="bi bi-shield-check fs-2 text-white"></i>
+              </div>
+              <div>
+                <h2 className="mb-0 fw-bold">InsurAI HR Portal</h2>
+                <small className="text-light opacity-75">
+                  HR Management Portal v2.0
+                </small>
+              </div>
             </div>
-            <small className="text-muted">System Online</small>
-          </div>
-          <small className="text-muted d-block mt-1">v2.0.1 • Enterprise Edition</small>
-        </div>
-      </aside>
 
-      {/* Enhanced Content Area */}
-      <main className="dashboard-content flex-grow-1 bg-light">
-        <div className="dashboard-content-wrapper p-4">{renderContent()}</div>
-      </main>
-    </div>
+            <div className="col-md-6 text-end d-flex align-items-center justify-content-end gap-4">
+              <div className="text-end">
+                <div className="fw-bold">
+                  {localStorage.getItem("hrName") || "HR Administrator"}
+                </div>
+                <small className="text-light opacity-75">
+                  <i className="bi bi-building me-1"></i> Corporate Account
+                </small>
+              </div>
+              <div
+                className="vr bg-light opacity-50"
+                style={{ height: "30px" }}
+              ></div>
+              <button
+                className="btn btn-outline-light btn-sm"
+                onClick={handleLogout}
+              >
+                <i className="bi bi-box-arrow-right me-2"></i> Logout
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Enhanced Main Layout */}
+      <div className="dashboard-main d-flex">
+        {/* Enhanced Sidebar */}
+        <aside className="dashboard-sidebar bg-light border-end">
+          <nav className="nav flex-column p-3">
+            {[
+              {
+                id: "home",
+                icon: "bi-speedometer2",
+                label: "Dashboard",
+                badge: null,
+              },
+              {
+                id: "claims",
+                icon: "bi-file-earmark-check",
+                label: "Claim Approval",
+                badge: dashboardStats.pendingClaims,
+              },
+              {
+                id: "policies",
+                icon: "bi-card-list",
+                label: "Policy Management",
+                badge: dashboardStats.activePolicies,
+              },
+              {
+                id: "employees",
+                icon: "bi-people",
+                label: "Employee Portal",
+                badge: dashboardStats.activeEmployees,
+              },
+              {
+                id: "fraud",
+                icon: "bi-shield-exclamation",
+                label: "Fraud Monitoring",
+                badge: dashboardStats.fraudRiskScore > 70 ? "!" : null,
+              },
+              {
+                id: "reports",
+                icon: "bi-graph-up",
+                label: "Analytics",
+                badge: null,
+              },
+              {
+                id: "notifications",
+                icon: "bi-bell",
+                label: "Notifications",
+                badge: notifications.filter((n) => !n.read).length,
+              },
+            ].map((item) => (
+              <a
+                key={item.id}
+                href="#"
+                className={`nav-link sidebar-link ${activeTab === item.id ? "active" : ""}`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  setActiveTab(item.id);
+                  // Auto-close sidebar on mobile
+                  document
+                    .querySelector(".dashboard-sidebar")
+                    .classList.remove("show");
+                }}
+              >
+                <i className={`${item.icon} me-3`}></i>
+                {item.label}
+                {item.badge !== null && item.badge > 0 && (
+                  <span className="badge theme-badge-danger ms-auto">
+                    {item.badge}
+                  </span>
+                )}
+                {item.badge === "!" && (
+                  <span className="badge theme-badge-warning ms-auto">!</span>
+                )}
+              </a>
+            ))}
+          </nav>
+
+          {/* Sidebar Footer */}
+          <div className="sidebar-footer p-3 border-top">
+            <div className="d-flex align-items-center mb-2">
+              <div className="bg-success rounded-circle p-1 me-2">
+                <i
+                  className="bi bi-circle-fill text-success"
+                  style={{ fontSize: "8px" }}
+                ></i>
+              </div>
+              <small className="text-muted">System Online</small>
+            </div>
+            <small className="text-muted d-block mt-1">
+              v2.0.1 • Enterprise Edition
+            </small>
+          </div>
+        </aside>
+
+        {/* Enhanced Content Area */}
+        <main className="dashboard-content flex-grow-1 bg-light">
+          <div className="dashboard-content-wrapper p-4">{renderContent()}</div>
+        </main>
+      </div>
 
       {/* Enhanced Global Styles */}
       <style>{`

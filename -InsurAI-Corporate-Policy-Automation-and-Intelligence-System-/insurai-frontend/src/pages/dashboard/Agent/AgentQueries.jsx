@@ -1,14 +1,14 @@
 import React, { useState, useMemo } from "react";
 
-export default function AgentQueries({ 
-  availability, 
-  filter, 
-  setFilter, 
-  employeeQueries, 
-  handleResponseChange, 
-  respondToQuery, 
-  axios, 
-  setEmployeeQueries 
+export default function AgentQueries({
+  availability,
+  filter,
+  setFilter,
+  employeeQueries,
+  handleResponseChange,
+  respondToQuery,
+  axios,
+  setEmployeeQueries,
 }) {
   const [activeChart, setActiveChart] = useState("status");
   const [selectedQuery, setSelectedQuery] = useState(null);
@@ -17,21 +17,25 @@ export default function AgentQueries({
   // Enhanced statistics with chart data
   const queryStats = useMemo(() => {
     const total = employeeQueries.length;
-    const pending = employeeQueries.filter(q => q.status === "Pending").length;
-    const resolvedQueries = employeeQueries.filter(q => q.status === "Resolved");
+    const pending = employeeQueries.filter(
+      (q) => q.status === "Pending",
+    ).length;
+    const resolvedQueries = employeeQueries.filter(
+      (q) => q.status === "Resolved",
+    );
     const resolved = resolvedQueries.length;
     const responseRate = total > 0 ? Math.round((resolved / total) * 100) : 0;
-    
+
     // Data for charts
     const queriesByDay = {};
     const queriesByType = {};
     const responseTimeData = [];
 
-    employeeQueries.forEach(query => {
+    employeeQueries.forEach((query) => {
       // Count by day
       if (query.createdAt) {
         const date = new Date(query.createdAt);
-        const day = date.toLocaleDateString('en-US', { weekday: 'short' });
+        const day = date.toLocaleDateString("en-US", { weekday: "short" });
         queriesByDay[day] = (queriesByDay[day] || 0) + 1;
       }
 
@@ -40,7 +44,10 @@ export default function AgentQueries({
       queriesByType[type] = (queriesByType[type] || 0) + 1;
 
       // Response time calculation for resolved queries
-      if (query.status === "Resolved" && (query.resolvedAt || query.updatedAt)) {
+      if (
+        query.status === "Resolved" &&
+        (query.resolvedAt || query.updatedAt)
+      ) {
         const created = new Date(query.createdAt);
         const resolved = new Date(query.resolvedAt || query.updatedAt);
         if (!isNaN(created) && !isNaN(resolved)) {
@@ -56,14 +63,14 @@ export default function AgentQueries({
         ? responseTimeData.reduce((a, b) => a + b, 0) / responseTimeData.length
         : 0;
 
-    return { 
-      total, 
-      pending, 
-      resolved, 
+    return {
+      total,
+      pending,
+      resolved,
       responseRate,
       avgResponseTime,
       queriesByDay,
-      queriesByType
+      queriesByType,
     };
   }, [employeeQueries]);
 
@@ -80,40 +87,42 @@ export default function AgentQueries({
 
   // Toggle availability
   const toggleAvailability = () => {
-    alert(`You are now ${!availability ? 'available' : 'unavailable'} for queries`);
+    alert(
+      `You are now ${!availability ? "available" : "unavailable"} for queries`,
+    );
   };
 
   // Enhanced Statistics Cards with Theme Colors
   const renderStatsCards = () => (
     <div className="row mb-4">
       {[
-        { 
-          title: "Total Queries", 
-          value: queryStats.total, 
-          icon: "bi-chat-left-text", 
+        {
+          title: "Total Queries",
+          value: queryStats.total,
+          icon: "bi-chat-left-text",
           color: "primary",
-          description: "All time queries"
+          description: "All time queries",
         },
-        { 
-          title: "Pending", 
-          value: queryStats.pending, 
-          icon: "bi-clock", 
+        {
+          title: "Pending",
+          value: queryStats.pending,
+          icon: "bi-clock",
           color: "warning",
-          description: "Require attention"
+          description: "Require attention",
         },
-        { 
-          title: "Resolved", 
-          value: queryStats.resolved, 
-          icon: "bi-check-circle", 
+        {
+          title: "Resolved",
+          value: queryStats.resolved,
+          icon: "bi-check-circle",
           color: "success",
-          description: "Successfully closed"
+          description: "Successfully closed",
         },
-        { 
-          title: "Avg Response", 
-          value: `${queryStats.avgResponseTime.toFixed(1)}h`, 
-          icon: "bi-graph-up", 
+        {
+          title: "Avg Response",
+          value: `${queryStats.avgResponseTime.toFixed(1)}h`,
+          icon: "bi-graph-up",
           color: "info",
-          description: "Average resolution time"
+          description: "Average resolution time",
         },
       ].map((stat, idx) => (
         <div key={idx} className="col-xl-3 col-md-6 mb-4">
@@ -129,7 +138,9 @@ export default function AgentQueries({
                 </div>
                 <div className="col-auto">
                   <div className={`metric-icon bg-${stat.color} bg-opacity-10`}>
-                    <i className={`bi ${stat.icon} text-${stat.color} fs-4`}></i>
+                    <i
+                      className={`bi ${stat.icon} text-${stat.color} fs-4`}
+                    ></i>
                   </div>
                 </div>
               </div>
@@ -150,8 +161,8 @@ export default function AgentQueries({
             {[
               { key: "status", label: "Status" },
               { key: "timeline", label: "Timeline" },
-              { key: "types", label: "Types" }
-            ].map(chart => (
+              { key: "types", label: "Types" },
+            ].map((chart) => (
               <button
                 key={chart.key}
                 className={`btn ${activeChart === chart.key ? "btn-primary" : "btn-outline-primary"}`}
@@ -169,19 +180,21 @@ export default function AgentQueries({
           <div className="row align-items-center">
             <div className="col-md-6">
               <div className="d-flex justify-content-center">
-                <div 
+                <div
                   className="rounded-circle d-flex align-items-center justify-content-center position-relative"
-                  style={{ 
-                    width: '200px', 
-                    height: '200px', 
+                  style={{
+                    width: "200px",
+                    height: "200px",
                     background: `conic-gradient(
                       #10B981 0% ${(queryStats.resolved / Math.max(queryStats.total, 1)) * 100}%,
                       #F59E0B 0% 100%
-                    )`
+                    )`,
                   }}
                 >
-                  <div className="rounded-circle bg-white d-flex align-items-center justify-content-center shadow-sm"
-                       style={{ width: '150px', height: '150px' }}>
+                  <div
+                    className="rounded-circle bg-white d-flex align-items-center justify-content-center shadow-sm"
+                    style={{ width: "150px", height: "150px" }}
+                  >
                     <div className="text-center">
                       <div className="h4 mb-0 fw-bold text-dark">
                         {queryStats.responseRate}%
@@ -195,19 +208,41 @@ export default function AgentQueries({
             <div className="col-md-6">
               <div className="mb-3">
                 <div className="d-flex align-items-center mb-2">
-                  <div className="bg-success rounded me-2" style={{width: '12px', height: '12px'}}></div>
+                  <div
+                    className="bg-success rounded me-2"
+                    style={{ width: "12px", height: "12px" }}
+                  ></div>
                   <span className="flex-grow-1 text-dark">Resolved</span>
-                  <span className="fw-bold text-dark">{queryStats.resolved}</span>
+                  <span className="fw-bold text-dark">
+                    {queryStats.resolved}
+                  </span>
                   <span className="text-muted ms-2">
-                    ({queryStats.total > 0 ? Math.round((queryStats.resolved / queryStats.total) * 100) : 0}%)
+                    (
+                    {queryStats.total > 0
+                      ? Math.round(
+                          (queryStats.resolved / queryStats.total) * 100,
+                        )
+                      : 0}
+                    %)
                   </span>
                 </div>
                 <div className="d-flex align-items-center">
-                  <div className="bg-warning rounded me-2" style={{width: '12px', height: '12px'}}></div>
+                  <div
+                    className="bg-warning rounded me-2"
+                    style={{ width: "12px", height: "12px" }}
+                  ></div>
                   <span className="flex-grow-1 text-dark">Pending</span>
-                  <span className="fw-bold text-dark">{queryStats.pending}</span>
+                  <span className="fw-bold text-dark">
+                    {queryStats.pending}
+                  </span>
                   <span className="text-muted ms-2">
-                    ({queryStats.total > 0 ? Math.round((queryStats.pending / queryStats.total) * 100) : 0}%)
+                    (
+                    {queryStats.total > 0
+                      ? Math.round(
+                          (queryStats.pending / queryStats.total) * 100,
+                        )
+                      : 0}
+                    %)
                   </span>
                 </div>
               </div>
@@ -219,21 +254,28 @@ export default function AgentQueries({
         {activeChart === "timeline" && (
           <div>
             <h6 className="text-center mb-4 text-dark">Queries by Day</h6>
-            <div className="d-flex align-items-end justify-content-between" style={{height: '150px'}}>
-              {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(day => {
+            <div
+              className="d-flex align-items-end justify-content-between"
+              style={{ height: "150px" }}
+            >
+              {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((day) => {
                 const count = queryStats.queriesByDay[day] || 0;
-                const maxCount = Math.max(...Object.values(queryStats.queriesByDay), 1);
+                const maxCount = Math.max(
+                  ...Object.values(queryStats.queriesByDay),
+                  1,
+                );
                 const height = (count / maxCount) * 100;
-                
+
                 return (
                   <div key={day} className="text-center mx-1">
-                    <div 
+                    <div
                       className="bg-primary rounded-top mx-auto"
-                      style={{ 
-                        height: `${height}px`, 
-                        width: '25px',
+                      style={{
+                        height: `${height}px`,
+                        width: "25px",
                         opacity: 0.8,
-                        background: 'linear-gradient(135deg, #0f0f1a 0%, #206c95ff 100%) !important'
+                        background:
+                          "linear-gradient(135deg, #0f0f1a 0%, #206c95ff 100%) !important",
                       }}
                     ></div>
                     <div className="small text-muted mt-1">{day}</div>
@@ -250,33 +292,46 @@ export default function AgentQueries({
           <div>
             <h6 className="text-center mb-4 text-dark">Queries by Type</h6>
             <div className="row">
-              {Object.entries(queryStats.queriesByType).map(([type, count], index) => {
-                const percentage = (count / Math.max(queryStats.total, 1)) * 100;
-                const colors = ['primary', 'success', 'warning', 'info', 'secondary'];
-                const color = colors[index % colors.length];
-                
-                return (
-                  <div key={type} className="col-md-6 mb-3">
-                    <div className="d-flex align-items-center">
-                      <div className="flex-grow-1">
-                        <div className="d-flex justify-content-between mb-1">
-                          <span className="fw-semibold text-dark">{type}</span>
-                          <span className="fw-bold text-dark">{count}</span>
-                        </div>
-                        <div className="progress" style={{height: '8px'}}>
-                          <div 
-                            className={`progress-bar bg-${color}`}
-                            style={{ width: `${percentage}%` }}
-                          ></div>
-                        </div>
-                        <div className="text-end">
-                          <small className="text-muted">{percentage.toFixed(1)}%</small>
+              {Object.entries(queryStats.queriesByType).map(
+                ([type, count], index) => {
+                  const percentage =
+                    (count / Math.max(queryStats.total, 1)) * 100;
+                  const colors = [
+                    "primary",
+                    "success",
+                    "warning",
+                    "info",
+                    "secondary",
+                  ];
+                  const color = colors[index % colors.length];
+
+                  return (
+                    <div key={type} className="col-md-6 mb-3">
+                      <div className="d-flex align-items-center">
+                        <div className="flex-grow-1">
+                          <div className="d-flex justify-content-between mb-1">
+                            <span className="fw-semibold text-dark">
+                              {type}
+                            </span>
+                            <span className="fw-bold text-dark">{count}</span>
+                          </div>
+                          <div className="progress" style={{ height: "8px" }}>
+                            <div
+                              className={`progress-bar bg-${color}`}
+                              style={{ width: `${percentage}%` }}
+                            ></div>
+                          </div>
+                          <div className="text-end">
+                            <small className="text-muted">
+                              {percentage.toFixed(1)}%
+                            </small>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                },
+              )}
             </div>
           </div>
         )}
@@ -302,17 +357,19 @@ export default function AgentQueries({
             />
           </div>
           <div className="col-md-4">
-            <button 
+            <button
               className="btn btn-primary w-100"
               onClick={() => {
                 if (quickResponse.trim()) {
                   // Apply to all pending queries
                   employeeQueries
-                    .filter(q => q.status === "Pending")
-                    .forEach(query => {
+                    .filter((q) => q.status === "Pending")
+                    .forEach((query) => {
                       handleResponseChange(query.id, quickResponse);
                     });
-                  alert(`Quick response applied to ${employeeQueries.filter(q => q.status === "Pending").length} pending queries`);
+                  alert(
+                    `Quick response applied to ${employeeQueries.filter((q) => q.status === "Pending").length} pending queries`,
+                  );
                 }
               }}
             >
@@ -334,9 +391,21 @@ export default function AgentQueries({
       {/* Header with Enhanced Availability Toggle */}
       <div className="d-flex justify-content-between align-items-center mb-4">
         <div>
-          <h3 className="mb-2" style={{ fontWeight: '700', background: 'linear-gradient(to right, #010f0c, #087f5b)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Employee Queries</h3>
+          <h3
+            className="mb-2"
+            style={{
+              fontWeight: "700",
+              background: "linear-gradient(to right, #010f0c, #087f5b)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+            }}
+          >
+            Employee Queries
+          </h3>
 
-          <p className="text-muted mb-0">Manage and respond to employee inquiries</p>
+          <p className="text-muted mb-0">
+            Manage and respond to employee inquiries
+          </p>
         </div>
         <div className="d-flex align-items-center gap-3">
           <span className="text-muted">Status:</span>
@@ -346,10 +415,12 @@ export default function AgentQueries({
               type="checkbox"
               checked={availability}
               onChange={toggleAvailability}
-              style={{transform: 'scale(1.2)'}}
+              style={{ transform: "scale(1.2)" }}
             />
           </div>
-          <span className={`badge ${availability ? "bg-success" : "bg-warning"}`}>
+          <span
+            className={`badge ${availability ? "bg-success" : "bg-warning"}`}
+          >
             {availability ? "Available" : "Unavailable"}
           </span>
         </div>
@@ -369,16 +440,22 @@ export default function AgentQueries({
               {[
                 { label: "All", value: "All", color: "primary" },
                 { label: "Pending", value: "Pending", color: "warning" },
-                { label: "Resolved", value: "Resolved", color: "success" }
-              ].map(filterBtn => (
+                { label: "Resolved", value: "Resolved", color: "success" },
+              ].map((filterBtn) => (
                 <button
                   key={filterBtn.value}
                   className={`btn btn-sm ${filter === filterBtn.value ? `btn-${filterBtn.color}` : `btn-outline-${filterBtn.color}`}`}
                   onClick={() => setFilter(filterBtn.value)}
                 >
-                  {filterBtn.label} 
+                  {filterBtn.label}
                   <span className="badge bg-dark ms-2">
-                    {employeeQueries.filter(q => filterBtn.value === "All" ? true : q.status === filterBtn.value).length}
+                    {
+                      employeeQueries.filter((q) =>
+                        filterBtn.value === "All"
+                          ? true
+                          : q.status === filterBtn.value,
+                      ).length
+                    }
                   </span>
                 </button>
               ))}
@@ -393,16 +470,25 @@ export default function AgentQueries({
           <div className="d-flex justify-content-between align-items-center">
             <h6 className="fw-bold text-dark mb-0">
               Query Management
-              <span className="badge bg-primary ms-2">{employeeQueries.filter(q => filter === "All" ? true : q.status === filter).length}</span>
+              <span className="badge bg-primary ms-2">
+                {
+                  employeeQueries.filter((q) =>
+                    filter === "All" ? true : q.status === filter,
+                  ).length
+                }
+              </span>
             </h6>
             <div className="text-muted small">
-              {queryStats.pending} pending queries • {queryStats.avgResponseTime.toFixed(1)}h avg response
+              {queryStats.pending} pending queries •{" "}
+              {queryStats.avgResponseTime.toFixed(1)}h avg response
             </div>
           </div>
         </div>
 
         <div className="card-body p-0">
-          {employeeQueries.filter(q => (filter === "All" ? true : q.status === filter)).length === 0 ? (
+          {employeeQueries.filter((q) =>
+            filter === "All" ? true : q.status === filter,
+          ).length === 0 ? (
             <div className="text-center py-5">
               <i className="bi bi-chat-left-text display-4 text-muted mb-3"></i>
               <h5 className="text-muted">No queries found</h5>
@@ -429,23 +515,42 @@ export default function AgentQueries({
                 </thead>
                 <tbody>
                   {employeeQueries
-                    .filter(q => (filter === "All" ? true : q.status === filter))
-                    .map(query => (
+                    .filter((q) =>
+                      filter === "All" ? true : q.status === filter,
+                    )
+                    .map((query) => (
                       <tr key={query.id}>
                         <td>
                           <div className="d-flex align-items-center">
-                            <div className="bg-primary rounded-circle text-white d-flex align-items-center justify-content-center me-2" 
-                                 style={{width: '32px', height: '32px', fontSize: '0.8rem'}}>
-                              {query.employee ? query.employee.charAt(0).toUpperCase() : 'E'}
+                            <div
+                              className="bg-primary rounded-circle text-white d-flex align-items-center justify-content-center me-2"
+                              style={{
+                                width: "32px",
+                                height: "32px",
+                                fontSize: "0.8rem",
+                              }}
+                            >
+                              {query.employee
+                                ? query.employee.charAt(0).toUpperCase()
+                                : "E"}
                             </div>
                             <div>
-                              <div className="fw-semibold text-dark">{query.employee || `Employee ${query.employeeId}`}</div>
-                              <small className="text-muted">ID: {query.employeeId}</small>
+                              <div className="fw-semibold text-dark">
+                                {query.employee ||
+                                  `Employee ${query.employeeId}`}
+                              </div>
+                              <small className="text-muted">
+                                ID: {query.employeeId}
+                              </small>
                             </div>
                           </div>
                         </td>
                         <td>
-                          <div className="text-truncate text-dark" style={{maxWidth: '200px'}} title={query.query}>
+                          <div
+                            className="text-truncate text-dark"
+                            style={{ maxWidth: "200px" }}
+                            title={query.query}
+                          >
                             {query.query}
                           </div>
                         </td>
@@ -453,14 +558,21 @@ export default function AgentQueries({
                         <td className="text-dark">{query.claimType || "-"}</td>
                         <td>
                           <small className="text-muted">
-                            {query.createdAt ? new Date(query.createdAt).toLocaleDateString() : "Invalid Date"}
+                            {query.createdAt
+                              ? new Date(query.createdAt).toLocaleDateString()
+                              : "Invalid Date"}
                           </small>
                         </td>
                         <td>
-                          <span className={`badge ${
-                            query.status === "Pending" ? "bg-warning" : 
-                            query.status === "Resolved" ? "bg-success" : "bg-info"
-                          }`}>
+                          <span
+                            className={`badge ${
+                              query.status === "Pending"
+                                ? "bg-warning"
+                                : query.status === "Resolved"
+                                  ? "bg-success"
+                                  : "bg-info"
+                            }`}
+                          >
                             {query.status}
                           </span>
                         </td>
@@ -471,13 +583,19 @@ export default function AgentQueries({
                               className="form-control form-control-sm"
                               placeholder="Type response..."
                               value={query.response || ""}
-                              onChange={e => handleResponseChange(query.id, e.target.value)}
-                              disabled={query.status === "Resolved" && !query.isEditing}
+                              onChange={(e) =>
+                                handleResponseChange(query.id, e.target.value)
+                              }
+                              disabled={
+                                query.status === "Resolved" && !query.isEditing
+                              }
                             />
                             {quickResponse && (
                               <button
                                 className="btn btn-sm btn-outline-secondary"
-                                onClick={() => handleResponseChange(query.id, quickResponse)}
+                                onClick={() =>
+                                  handleResponseChange(query.id, quickResponse)
+                                }
                                 title="Use quick response"
                               >
                                 <i className="bi bi-lightning"></i>
@@ -492,8 +610,13 @@ export default function AgentQueries({
                                 <button
                                   className="btn btn-sm btn-outline-primary"
                                   onClick={() => {
-                                    if (!query.response || query.response.trim() === "") {
-                                      alert("Please type a response before submitting");
+                                    if (
+                                      !query.response ||
+                                      query.response.trim() === ""
+                                    ) {
+                                      alert(
+                                        "Please type a response before submitting",
+                                      );
                                       return;
                                     }
                                     respondToQuery(query.id, query.response);
@@ -506,19 +629,33 @@ export default function AgentQueries({
                                   onClick={async () => {
                                     try {
                                       await axios.put(
-                                        `https://ingenious-surprise-production.up.railway.app/agent/queries/respond/${query.id}`,
-                                        { response: query.response || "Resolved" },
-                                        { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
+                                        `https://insurai-backend-production.up.railway.app/agent/queries/respond/${query.id}`,
+                                        {
+                                          response:
+                                            query.response || "Resolved",
+                                        },
+                                        {
+                                          headers: {
+                                            Authorization: `Bearer ${localStorage.getItem("token")}`,
+                                          },
+                                        },
                                       );
-                                      setEmployeeQueries(prev =>
-                                        prev.map(q =>
+                                      setEmployeeQueries((prev) =>
+                                        prev.map((q) =>
                                           q.id === query.id
-                                            ? { ...q, status: "Resolved", isEditing: false }
-                                            : q
-                                        )
+                                            ? {
+                                                ...q,
+                                                status: "Resolved",
+                                                isEditing: false,
+                                              }
+                                            : q,
+                                        ),
                                       );
                                     } catch (err) {
-                                      console.error("Failed to resolve query:", err);
+                                      console.error(
+                                        "Failed to resolve query:",
+                                        err,
+                                      );
                                     }
                                   }}
                                 >
@@ -532,22 +669,32 @@ export default function AgentQueries({
                                 className={`btn btn-sm ${query.isEditing ? "btn-success" : "btn-outline-primary"}`}
                                 onClick={() => {
                                   if (query.isEditing) {
-                                    respondToQuery(query.id, query.response, true);
-                                    setEmployeeQueries(prev =>
-                                      prev.map(q =>
-                                        q.id === query.id ? { ...q, isEditing: false } : q
-                                      )
+                                    respondToQuery(
+                                      query.id,
+                                      query.response,
+                                      true,
+                                    );
+                                    setEmployeeQueries((prev) =>
+                                      prev.map((q) =>
+                                        q.id === query.id
+                                          ? { ...q, isEditing: false }
+                                          : q,
+                                      ),
                                     );
                                   } else {
-                                    setEmployeeQueries(prev =>
-                                      prev.map(q =>
-                                        q.id === query.id ? { ...q, isEditing: true } : q
-                                      )
+                                    setEmployeeQueries((prev) =>
+                                      prev.map((q) =>
+                                        q.id === query.id
+                                          ? { ...q, isEditing: true }
+                                          : q,
+                                      ),
                                     );
                                   }
                                 }}
                               >
-                                <i className={`bi ${query.isEditing ? "bi-check-lg" : "bi-pencil"} me-1`}></i>
+                                <i
+                                  className={`bi ${query.isEditing ? "bi-check-lg" : "bi-pencil"} me-1`}
+                                ></i>
                                 {query.isEditing ? "Update" : "Edit"}
                               </button>
                             )}

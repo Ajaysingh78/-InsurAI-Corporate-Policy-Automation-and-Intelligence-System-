@@ -3,7 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 export default function EmployeeRegister() {
-  const [employeeId, setEmployeeId] = useState(""); 
+  const [employeeId, setEmployeeId] = useState("");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -37,20 +37,23 @@ export default function EmployeeRegister() {
     }
 
     try {
-      const res = await fetch("https://ingenious-surprise-production.up.railway.app/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          employeeId: employeeId.trim(),
-          name: name.trim(),
-          email: email.trim().toLowerCase(),
-          password: password 
-        }), 
-      });
+      const res = await fetch(
+        "https://insurai-backend-production.up.railway.app/auth/register",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            employeeId: employeeId.trim(),
+            name: name.trim(),
+            email: email.trim().toLowerCase(),
+            password: password,
+          }),
+        },
+      );
 
       let responseData;
       const contentType = res.headers.get("content-type");
-      
+
       if (contentType && contentType.includes("application/json")) {
         responseData = await res.json();
       } else {
@@ -60,7 +63,7 @@ export default function EmployeeRegister() {
 
       if (res.ok) {
         setMessage("Registration successful! Redirecting to login...");
-        
+
         // Store employee info in localStorage
         localStorage.setItem("employeeId", employeeId);
         localStorage.setItem("name", name);
@@ -76,15 +79,30 @@ export default function EmployeeRegister() {
       } else {
         // Handle 400 Bad Request and other errors
         if (res.status === 400) {
-          if (responseData.message && responseData.message.toLowerCase().includes("employee")) {
-            setMessage("Employee ID already exists. Please use a different ID.");
-          } else if (responseData.message && responseData.message.toLowerCase().includes("email")) {
-            setMessage("Email address already registered. Please use a different email.");
+          if (
+            responseData.message &&
+            responseData.message.toLowerCase().includes("employee")
+          ) {
+            setMessage(
+              "Employee ID already exists. Please use a different ID.",
+            );
+          } else if (
+            responseData.message &&
+            responseData.message.toLowerCase().includes("email")
+          ) {
+            setMessage(
+              "Email address already registered. Please use a different email.",
+            );
           } else {
-            setMessage(responseData.message || "Invalid registration data. Please check your information.");
+            setMessage(
+              responseData.message ||
+                "Invalid registration data. Please check your information.",
+            );
           }
         } else {
-          setMessage(responseData.message || "Registration failed. Please try again.");
+          setMessage(
+            responseData.message || "Registration failed. Please try again.",
+          );
         }
       }
     } catch (err) {
@@ -100,94 +118,82 @@ export default function EmployeeRegister() {
     return re.test(email);
   };
 
-return (
-  <div className="auth-root">
-    <div className="auth-card">
+  return (
+    <div className="auth-root">
+      <div className="auth-card">
+        {/* BRAND */}
+        <h2 className="brand">
+          Insur<span>AI</span>
+        </h2>
 
-      {/* BRAND */}
-      <h2 className="brand">
-        Insur<span>AI</span>
-      </h2>
+        <h3 className="title">Create Account</h3>
+        <p className="subtitle">Register to access InsurAI platform</p>
 
-      <h3 className="title">Create Account</h3>
-      <p className="subtitle">
-        Register to access InsurAI platform
-      </p>
-
-      {message && (
-        <div
-          className={`alert ${
-            message.includes("successful")
-              ? "alert-success"
-              : "alert-danger"
-          }`}
-        >
-          {message}
-        </div>
-      )}
-
-      {/* 🔴 LOGIC SAME – form SAME */}
-      <form onSubmit={handleRegister}>
-        <input
-          className="auth-input"
-          placeholder="Employee ID"
-          value={employeeId}
-          onChange={(e) => setEmployeeId(e.target.value)}
-        />
-
-        <input
-          className="auth-input"
-          placeholder="Full Name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
-
-        <input
-          className="auth-input"
-          placeholder="Email Address"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-
-        <div className="password-wrapper">
-          <input
-            type={showPassword ? "text" : "password"}
-            className="auth-input"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          <span
-            className="eye"
-            onClick={() => setShowPassword(!showPassword)}
+        {message && (
+          <div
+            className={`alert ${
+              message.includes("successful") ? "alert-success" : "alert-danger"
+            }`}
           >
-            {showPassword ? "🙈" : "👁️"}
-          </span>
+            {message}
+          </div>
+        )}
+
+        {/* 🔴 LOGIC SAME – form SAME */}
+        <form onSubmit={handleRegister}>
+          <input
+            className="auth-input"
+            placeholder="Employee ID"
+            value={employeeId}
+            onChange={(e) => setEmployeeId(e.target.value)}
+          />
+
+          <input
+            className="auth-input"
+            placeholder="Full Name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+
+          <input
+            className="auth-input"
+            placeholder="Email Address"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+
+          <div className="password-wrapper">
+            <input
+              type={showPassword ? "text" : "password"}
+              className="auth-input"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            <span
+              className="eye"
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              {showPassword ? "🙈" : "👁️"}
+            </span>
+          </div>
+
+          <button type="submit" className="auth-btn" disabled={loading}>
+            {loading ? "Creating..." : "Create Account"}
+          </button>
+        </form>
+
+        <div className="mt-3">
+          <small className="text-muted">
+            Already have an account? <Link to="/employee/login">Sign in</Link>
+          </small>
         </div>
 
-        <button
-          type="submit"
-          className="auth-btn"
-          disabled={loading}
-        >
-          {loading ? "Creating..." : "Create Account"}
-        </button>
-      </form>
-
-      <div className="mt-3">
-        <small className="text-muted">
-          Already have an account?{" "}
-          <Link to="/employee/login">Sign in</Link>
-        </small>
+        <div className="footer">🔐 Secure JWT Authentication</div>
       </div>
 
-      <div className="footer">
-        🔐 Secure JWT Authentication
-      </div>
-    </div>
-
-    {/* ===== ONLY UI CSS ===== */}
-    <style>{`
+      {/* ===== ONLY UI CSS ===== */}
+      <style>{`
       .auth-root {
         min-height: 100vh;
         width: 100vw;
@@ -287,21 +293,16 @@ return (
         opacity: 0.6;
       }
     `}</style>
-  </div>
-);
+    </div>
+  );
 }
-
-
-
-
-
 
 // import React, { useState } from "react";
 // import { useNavigate, Link } from "react-router-dom";
 // import "bootstrap/dist/css/bootstrap.min.css";
 
 // export default function EmployeeRegister() {
-//   const [employeeId, setEmployeeId] = useState(""); 
+//   const [employeeId, setEmployeeId] = useState("");
 //   const [name, setName] = useState("");
 //   const [email, setEmail] = useState("");
 //   const [password, setPassword] = useState("");
@@ -338,17 +339,17 @@ return (
 //       const res = await fetch("http://localhost:8080/auth/register", {
 //         method: "POST",
 //         headers: { "Content-Type": "application/json" },
-//         body: JSON.stringify({ 
+//         body: JSON.stringify({
 //           employeeId: employeeId.trim(),
 //           name: name.trim(),
 //           email: email.trim().toLowerCase(),
-//           password: password 
-//         }), 
+//           password: password
+//         }),
 //       });
 
 //       let responseData;
 //       const contentType = res.headers.get("content-type");
-      
+
 //       if (contentType && contentType.includes("application/json")) {
 //         responseData = await res.json();
 //       } else {
@@ -358,7 +359,7 @@ return (
 
 //       if (res.ok) {
 //         setMessage("Registration successful! Redirecting to login...");
-        
+
 //         // Store employee info in localStorage
 //         localStorage.setItem("employeeId", employeeId);
 //         localStorage.setItem("name", name);
@@ -545,7 +546,3 @@ return (
 //     </div>
 //   );
 // }
-
-
-
-

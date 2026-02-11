@@ -1,7 +1,18 @@
 // src/pages/dashboard/Hr/HRFraud.jsx
 import React, { useEffect, useState, useMemo } from "react";
 import { Bar, Pie, Line } from "react-chartjs-2";
-import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement, PointElement, LineElement } from "chart.js";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement,
+  PointElement,
+  LineElement,
+} from "chart.js";
 import { CSVLink } from "react-csv";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
@@ -15,7 +26,7 @@ ChartJS.register(
   Title,
   Tooltip,
   Legend,
-  ArcElement
+  ArcElement,
 );
 
 const HRFraud = () => {
@@ -29,13 +40,17 @@ const HRFraud = () => {
   const fetchFraudAlerts = async () => {
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch("https://ingenious-surprise-production.up.railway.app/hr/claims/fraud", {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+      const response = await fetch(
+        "https://insurai-backend-production.up.railway.app/hr/claims/fraud",
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
         },
-      });
-      if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+      );
+      if (!response.ok)
+        throw new Error(`HTTP error! Status: ${response.status}`);
       const data = await response.json();
       setFraudAlerts(data);
       setLoading(false);
@@ -51,35 +66,37 @@ const HRFraud = () => {
 
   const [employees, setEmployees] = useState([]);
 
-const fetchEmployees = async () => {
-  try {
-    const token = localStorage.getItem("token");
-    const res = await fetch("https://ingenious-surprise-production.up.railway.app/employees", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+  const fetchEmployees = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(
+        "https://insurai-backend-production.up.railway.app/employees",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+      if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+      const data = await res.json();
+      setEmployees(data);
+    } catch (error) {
+      console.error("Error fetching employees:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchFraudAlerts();
+    fetchEmployees();
+  }, []);
+
+  const employeeMap = useMemo(() => {
+    const map = {};
+    employees.forEach((emp) => {
+      map[emp.id] = emp.employeeId; // numeric id → string EMP_xxx
     });
-    if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-    const data = await res.json();
-    setEmployees(data);
-  } catch (error) {
-    console.error("Error fetching employees:", error);
-  }
-};
-
-useEffect(() => {
-  fetchFraudAlerts();
-  fetchEmployees();
-}, []);
-
-const employeeMap = useMemo(() => {
-  const map = {};
-  employees.forEach(emp => {
-    map[emp.id] = emp.employeeId; // numeric id → string EMP_xxx
-  });
-  return map;
-}, [employees]);
-
+    return map;
+  }, [employees]);
 
   // Filtered and sorted alerts
   const enhancedAlerts = useMemo(() => {
@@ -89,7 +106,11 @@ const employeeMap = useMemo(() => {
         alert.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         alert.policyName?.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesStatus =
-        statusFilter === "All" ? true : statusFilter === "Pending" ? alert.status === "Pending" : alert.status === "Resolved";
+        statusFilter === "All"
+          ? true
+          : statusFilter === "Pending"
+            ? alert.status === "Pending"
+            : alert.status === "Resolved";
       return matchesSearch && matchesStatus;
     });
 
@@ -118,12 +139,17 @@ const employeeMap = useMemo(() => {
   const handleSort = (key) => {
     setSortConfig((current) => ({
       key,
-      direction: current.key === key && current.direction === "asc" ? "desc" : "asc",
+      direction:
+        current.key === key && current.direction === "asc" ? "desc" : "asc",
     }));
   };
 
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", minimumFractionDigits: 0 }).format(amount);
+    return new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
+      minimumFractionDigits: 0,
+    }).format(amount);
   };
 
   // Statistics
@@ -131,17 +157,32 @@ const employeeMap = useMemo(() => {
     const total = fraudAlerts.length;
     const pending = fraudAlerts.filter((a) => a.status === "Pending").length;
     const resolved = fraudAlerts.filter((a) => a.status === "Resolved").length;
-    const totalAmount = fraudAlerts.reduce((sum, a) => sum + (parseFloat(a.amount) || 0), 0);
-    const pendingAmount = fraudAlerts.filter((a) => a.status === "Pending").reduce((sum, a) => sum + (parseFloat(a.amount) || 0), 0);
+    const totalAmount = fraudAlerts.reduce(
+      (sum, a) => sum + (parseFloat(a.amount) || 0),
+      0,
+    );
+    const pendingAmount = fraudAlerts
+      .filter((a) => a.status === "Pending")
+      .reduce((sum, a) => sum + (parseFloat(a.amount) || 0), 0);
     const resolvedAmount = totalAmount - pendingAmount;
-    return { total, pending, resolved, totalAmount, pendingAmount, resolvedAmount };
+    return {
+      total,
+      pending,
+      resolved,
+      totalAmount,
+      pendingAmount,
+      resolvedAmount,
+    };
   }, [fraudAlerts]);
 
   // Chart Data
   const monthlyData = useMemo(() => {
     const monthMap = {};
     fraudAlerts.forEach((a) => {
-      const month = new Date(a.claimDate).toLocaleString("default", { month: "short", year: "numeric" });
+      const month = new Date(a.claimDate).toLocaleString("default", {
+        month: "short",
+        year: "numeric",
+      });
       if (!monthMap[month]) monthMap[month] = 0;
       monthMap[month] += a.amount;
     });
@@ -174,7 +215,10 @@ const employeeMap = useMemo(() => {
   const lineData = useMemo(() => {
     const monthMap = {};
     fraudAlerts.forEach((a) => {
-      const month = new Date(a.claimDate).toLocaleString("default", { month: "short", year: "numeric" });
+      const month = new Date(a.claimDate).toLocaleString("default", {
+        month: "short",
+        year: "numeric",
+      });
       if (!monthMap[month]) monthMap[month] = 0;
       if (a.status === "Resolved") monthMap[month] += a.amount;
     });
@@ -194,7 +238,15 @@ const employeeMap = useMemo(() => {
 
   const exportPDF = () => {
     const doc = new jsPDF();
-    const tableColumn = ["Claim ID", "Employee ID", "Title", "Policy", "Amount", "Status", "Fraud Reason"];
+    const tableColumn = [
+      "Claim ID",
+      "Employee ID",
+      "Title",
+      "Policy",
+      "Amount",
+      "Status",
+      "Fraud Reason",
+    ];
     const tableRows = enhancedAlerts.map((a) => [
       a.id,
       a.employeeId,
@@ -202,7 +254,10 @@ const employeeMap = useMemo(() => {
       a.policyName,
       formatCurrency(a.amount),
       a.status,
-      a.fraudReason?.split(";").map((r) => r.trim()).join("\n") || "-",
+      a.fraudReason
+        ?.split(";")
+        .map((r) => r.trim())
+        .join("\n") || "-",
     ]);
     doc.autoTable({ head: [tableColumn], body: tableRows });
     doc.save("fraud_alerts.pdf");
@@ -251,7 +306,9 @@ const employeeMap = useMemo(() => {
         <div className="col-md-2 col-6 mb-2">
           <div className="card bg-secondary bg-opacity-10 border-0 shadow-sm text-center">
             <div className="card-body">
-              <h5 className="text-secondary">{formatCurrency(stats.pendingAmount)}</h5>
+              <h5 className="text-secondary">
+                {formatCurrency(stats.pendingAmount)}
+              </h5>
               <small>Pending Amount</small>
             </div>
           </div>
@@ -259,7 +316,9 @@ const employeeMap = useMemo(() => {
         <div className="col-md-2 col-6 mb-2">
           <div className="card bg-success bg-opacity-10 border-0 shadow-sm text-center">
             <div className="card-body">
-              <h5 className="text-success">{formatCurrency(stats.resolvedAmount)}</h5>
+              <h5 className="text-success">
+                {formatCurrency(stats.resolvedAmount)}
+              </h5>
               <small>Total Amount Saved</small>
             </div>
           </div>
@@ -280,7 +339,9 @@ const employeeMap = useMemo(() => {
         </div>
         <div className="col-md-3 mb-3">
           <div className="card shadow-sm border-0">
-            <div className="card-header bg-gradient-warning text-dark">Status Distribution</div>
+            <div className="card-header bg-gradient-warning text-dark">
+              Status Distribution
+            </div>
             <div className="card-body">
               <Pie data={statusPieData} />
             </div>
@@ -288,7 +349,9 @@ const employeeMap = useMemo(() => {
         </div>
         <div className="col-md-3 mb-3">
           <div className="card shadow-sm border-0">
-            <div className="card-header bg-gradient-success text-white">Amount Saved Over Time</div>
+            <div className="card-header bg-gradient-success text-white">
+              Amount Saved Over Time
+            </div>
             <div className="card-body">
               <Line data={lineData} />
             </div>
@@ -308,14 +371,22 @@ const employeeMap = useMemo(() => {
           />
         </div>
         <div className="col-md-2 mb-2">
-          <select className="form-select" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+          <select
+            className="form-select"
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+          >
             <option value="All">All</option>
             <option value="Pending">Pending</option>
             <option value="Resolved">Resolved</option>
           </select>
         </div>
         <div className="col-md-6 d-flex gap-2 mb-2">
-          <CSVLink data={enhancedAlerts} filename="fraud_alerts.csv" className="btn btn-success btn-sm">
+          <CSVLink
+            data={enhancedAlerts}
+            filename="fraud_alerts.csv"
+            className="btn btn-success btn-sm"
+          >
             Export CSV
           </CSVLink>
           <button className="btn btn-danger btn-sm" onClick={exportPDF}>
@@ -326,18 +397,40 @@ const employeeMap = useMemo(() => {
 
       {/* Table */}
       <div className="card shadow-sm border-0">
-        <div className="card-header bg-gradient-primary text-white">Fraud Alerts</div>
+        <div className="card-header bg-gradient-primary text-white">
+          Fraud Alerts
+        </div>
         <div className="card-body p-0">
           <div className="table-responsive">
             <table className="table table-hover mb-0">
               <thead className="table-light">
                 <tr>
-                  <th onClick={() => handleSort("id")} className="cursor-pointer">Claim ID</th>
-                  <th onClick={() => handleSort("employeeId")} className="cursor-pointer">Employee ID</th>
+                  <th
+                    onClick={() => handleSort("id")}
+                    className="cursor-pointer"
+                  >
+                    Claim ID
+                  </th>
+                  <th
+                    onClick={() => handleSort("employeeId")}
+                    className="cursor-pointer"
+                  >
+                    Employee ID
+                  </th>
                   <th>Type</th>
                   <th>Policy</th>
-                  <th onClick={() => handleSort("amount")} className="cursor-pointer text-end">Amount</th>
-                  <th onClick={() => handleSort("claimDate")} className="cursor-pointer">Claim Date</th>
+                  <th
+                    onClick={() => handleSort("amount")}
+                    className="cursor-pointer text-end"
+                  >
+                    Amount
+                  </th>
+                  <th
+                    onClick={() => handleSort("claimDate")}
+                    className="cursor-pointer"
+                  >
+                    Claim Date
+                  </th>
                   <th>Status</th>
                   <th>Fraud Flag</th>
                   <th>Fraud Reasons</th>
@@ -347,29 +440,55 @@ const employeeMap = useMemo(() => {
               <tbody>
                 {enhancedAlerts.length === 0 ? (
                   <tr>
-                    <td colSpan="10" className="text-center py-5">No fraud alerts found</td>
+                    <td colSpan="10" className="text-center py-5">
+                      No fraud alerts found
+                    </td>
                   </tr>
                 ) : (
                   enhancedAlerts.map((a) => (
-                    <tr key={a.id} onClick={() => setViewingAlert(a)} className="cursor-pointer">
+                    <tr
+                      key={a.id}
+                      onClick={() => setViewingAlert(a)}
+                      className="cursor-pointer"
+                    >
                       <td>{a.id}</td>
-                      <td>{employeeMap[a.employeeId] || `EMP_${a.employeeId}`}</td>
+                      <td>
+                        {employeeMap[a.employeeId] || `EMP_${a.employeeId}`}
+                      </td>
                       <td>{a.title}</td>
                       <td>{a.policyName}</td>
                       <td className="text-end">{formatCurrency(a.amount)}</td>
                       <td>{a.claimDate?.split("T")[0]}</td>
                       <td>
-                        <span className={`badge ${a.status === "Pending" ? "bg-warning" : "bg-success"}`}>
+                        <span
+                          className={`badge ${a.status === "Pending" ? "bg-warning" : "bg-success"}`}
+                        >
                           {a.status}
                         </span>
                       </td>
-                      <td>{a.fraudFlag ? <span className="badge bg-danger">Yes</span> : <span className="badge bg-success">No</span>}</td>
                       <td>
-                        {a.fraudReason?.split(";").map((r, i) => r.trim() && <div key={i}>• {r.trim()}</div>)}
+                        {a.fraudFlag ? (
+                          <span className="badge bg-danger">Yes</span>
+                        ) : (
+                          <span className="badge bg-success">No</span>
+                        )}
+                      </td>
+                      <td>
+                        {a.fraudReason
+                          ?.split(";")
+                          .map(
+                            (r, i) =>
+                              r.trim() && <div key={i}>• {r.trim()}</div>,
+                          )}
                       </td>
                       <td>
                         {a.documents?.map((doc, i) => (
-                          <a key={i} href={`https://ingenious-surprise-production.up.railway.app${doc}`} target="_blank" className="d-block">
+                          <a
+                            key={i}
+                            href={`https://insurai-backend-production.up.railway.app${doc}`}
+                            target="_blank"
+                            className="d-block"
+                          >
                             Doc {i + 1}
                           </a>
                         ))}
@@ -385,33 +504,73 @@ const employeeMap = useMemo(() => {
 
       {/* Modal */}
       {viewingAlert && (
-        <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
+        <div
+          className="modal show d-block"
+          tabIndex="-1"
+          style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+        >
           <div className="modal-dialog modal-lg modal-dialog-centered">
             <div className="modal-content shadow-lg border-0">
               <div className="modal-header bg-gradient-primary text-white">
                 <h5 className="modal-title">Fraud Alert #{viewingAlert.id}</h5>
-                <button type="button" className="btn-close btn-close-white" onClick={() => setViewingAlert(null)}></button>
+                <button
+                  type="button"
+                  className="btn-close btn-close-white"
+                  onClick={() => setViewingAlert(null)}
+                ></button>
               </div>
               <div className="modal-body">
-                <p><strong>Employee ID:</strong> {viewingAlert.employeeId}</p>
-                <p><strong>Type:</strong> {viewingAlert.title}</p>
-                <p><strong>Policy:</strong> {viewingAlert.policyName}</p>
-                <p><strong>Amount:</strong> {formatCurrency(viewingAlert.amount)}</p>
-                <p><strong>Claim Date:</strong> {viewingAlert.claimDate?.split("T")[0]}</p>
-                <p><strong>Status:</strong> {viewingAlert.status}</p>
-                <p><strong>Fraud Reasons:</strong></p>
+                <p>
+                  <strong>Employee ID:</strong> {viewingAlert.employeeId}
+                </p>
+                <p>
+                  <strong>Type:</strong> {viewingAlert.title}
+                </p>
+                <p>
+                  <strong>Policy:</strong> {viewingAlert.policyName}
+                </p>
+                <p>
+                  <strong>Amount:</strong> {formatCurrency(viewingAlert.amount)}
+                </p>
+                <p>
+                  <strong>Claim Date:</strong>{" "}
+                  {viewingAlert.claimDate?.split("T")[0]}
+                </p>
+                <p>
+                  <strong>Status:</strong> {viewingAlert.status}
+                </p>
+                <p>
+                  <strong>Fraud Reasons:</strong>
+                </p>
                 <ul>
-                  {viewingAlert.fraudReason?.split(";").map((r, i) => r.trim() && <li key={i}>{r.trim()}</li>)}
+                  {viewingAlert.fraudReason
+                    ?.split(";")
+                    .map((r, i) => r.trim() && <li key={i}>{r.trim()}</li>)}
                 </ul>
-                <p><strong>Documents:</strong></p>
+                <p>
+                  <strong>Documents:</strong>
+                </p>
                 <ul>
                   {viewingAlert.documents?.map((doc, i) => (
-                    <li key={i}><a href={`https://ingenious-surprise-production.up.railway.app${doc}`} target="_blank">Document {i + 1}</a></li>
+                    <li key={i}>
+                      <a
+                        href={`https://insurai-backend-production.up.railway.app${doc}`}
+                        target="_blank"
+                      >
+                        Document {i + 1}
+                      </a>
+                    </li>
                   ))}
                 </ul>
               </div>
               <div className="modal-footer">
-                <button type="button" className="btn btn-secondary" onClick={() => setViewingAlert(null)}>Close</button>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setViewingAlert(null)}
+                >
+                  Close
+                </button>
               </div>
             </div>
           </div>

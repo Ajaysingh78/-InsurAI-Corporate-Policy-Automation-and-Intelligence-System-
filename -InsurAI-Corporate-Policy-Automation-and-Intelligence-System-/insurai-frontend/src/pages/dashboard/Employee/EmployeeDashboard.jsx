@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import EmployeeClaims from './EmployeeClaims';
+import EmployeeClaims from "./EmployeeClaims";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import jsPDF from "jspdf";
-import EmployeeSupport from './EmployeeSupport';
-import EmployeeQueries from "./EmployeeQueries"; 
-import EmployeeNotification from "./EmployeeNotification"; 
-import Chatbot from './Chatbot';
+import EmployeeSupport from "./EmployeeSupport";
+import EmployeeQueries from "./EmployeeQueries";
+import EmployeeNotification from "./EmployeeNotification";
+import Chatbot from "./Chatbot";
 import EmployeePolicies from "./EmployeePolicies";
 
 export default function EmployeeDashboard() {
@@ -26,7 +26,7 @@ export default function EmployeeDashboard() {
     dashboard: false,
     policies: false,
     claims: false,
-    queries: false
+    queries: false,
   });
   const [employeeId, setEmployeeId] = useState(null);
 
@@ -35,7 +35,7 @@ export default function EmployeeDashboard() {
     amount: "",
     description: "",
     date: new Date().toISOString().split("T")[0],
-    documents: []
+    documents: [],
   });
 
   const [newQuery, setNewQuery] = useState({ queryText: "" });
@@ -59,17 +59,53 @@ export default function EmployeeDashboard() {
     monthlyPremium: 0,
     totalClaimsAmount: 0,
     avgClaimAmount: 0,
-    riskScore: 12
+    riskScore: 12,
   });
 
   // Enhanced claim types with categories and icons
   const [claimTypes, setClaimTypes] = useState([
-    { id: 1, name: "Health", category: "Medical", icon: "bi-heart-pulse", color: "danger" },
-    { id: 2, name: "Accident", category: "Medical", icon: "bi-bandaid", color: "warning" },
-    { id: 3, name: "Travel", category: "General", icon: "bi-airplane", color: "info" },
-    { id: 4, name: "Dental", category: "Medical", icon: "bi-tooth", color: "primary" },
-    { id: 5, name: "Vision", category: "Medical", icon: "bi-eye", color: "success" },
-    { id: 6, name: "Life", category: "Life", icon: "bi-person-check", color: "dark" },
+    {
+      id: 1,
+      name: "Health",
+      category: "Medical",
+      icon: "bi-heart-pulse",
+      color: "danger",
+    },
+    {
+      id: 2,
+      name: "Accident",
+      category: "Medical",
+      icon: "bi-bandaid",
+      color: "warning",
+    },
+    {
+      id: 3,
+      name: "Travel",
+      category: "General",
+      icon: "bi-airplane",
+      color: "info",
+    },
+    {
+      id: 4,
+      name: "Dental",
+      category: "Medical",
+      icon: "bi-tooth",
+      color: "primary",
+    },
+    {
+      id: 5,
+      name: "Vision",
+      category: "Medical",
+      icon: "bi-eye",
+      color: "success",
+    },
+    {
+      id: 6,
+      name: "Life",
+      category: "Life",
+      icon: "bi-person-check",
+      color: "dark",
+    },
   ]);
 
   // Real-time clock
@@ -82,7 +118,7 @@ export default function EmployeeDashboard() {
 
   // ------------------ KEEPING ORIGINAL LOGIN & REDIRECT CODE AS IS ------------------
   useEffect(() => {
-    const token = localStorage.getItem("token"); 
+    const token = localStorage.getItem("token");
     const storedName = localStorage.getItem("name");
 
     if (!token || token.trim() === "") {
@@ -103,32 +139,54 @@ export default function EmployeeDashboard() {
 
   // Enhanced data processing with more metrics
   useEffect(() => {
-    const activePolicies = policies.filter(p => p.status === "Active").length;
-    const totalCoverage = policies.reduce((sum, p) => sum + Number(p.coverageAmount || 0), 0);
-    const pendingClaims = claims.filter(c => c.status === "Pending" || c.status === "In Review").length;
+    const activePolicies = policies.filter((p) => p.status === "Active").length;
+    const totalCoverage = policies.reduce(
+      (sum, p) => sum + Number(p.coverageAmount || 0),
+      0,
+    );
+    const pendingClaims = claims.filter(
+      (c) => c.status === "Pending" || c.status === "In Review",
+    ).length;
     const totalQueries = queries.length;
-    const resolvedQueries = queries.filter(q => q.response && q.response.trim() !== "").length;
-    
-    const upcomingRenewals = policies.filter(p => {
+    const resolvedQueries = queries.filter(
+      (q) => q.response && q.response.trim() !== "",
+    ).length;
+
+    const upcomingRenewals = policies.filter((p) => {
       if (!p.renewalDate) return false;
-      const days = Math.ceil((new Date(p.renewalDate) - new Date()) / (1000*60*60*24));
+      const days = Math.ceil(
+        (new Date(p.renewalDate) - new Date()) / (1000 * 60 * 60 * 24),
+      );
       return days > 0 && days <= 30;
     }).length;
 
-    const approvedClaims = claims.filter(c => c.status === "Approved").length;
-    const approvalRate = claims.length > 0 ? Math.round((approvedClaims / claims.length) * 100) : 0;
+    const approvedClaims = claims.filter((c) => c.status === "Approved").length;
+    const approvalRate =
+      claims.length > 0
+        ? Math.round((approvedClaims / claims.length) * 100)
+        : 0;
 
-    const monthlyPremium = policies.reduce((sum, p) => sum + Number(p.monthlyPremium || 0), 0);
+    const monthlyPremium = policies.reduce(
+      (sum, p) => sum + Number(p.monthlyPremium || 0),
+      0,
+    );
     const totalClaimsAmount = claims.reduce((sum, claim) => {
-      const amount = parseFloat(String(claim.amount).replace(/[^0-9.-]+/g, "")) || 0;
+      const amount =
+        parseFloat(String(claim.amount).replace(/[^0-9.-]+/g, "")) || 0;
       return sum + amount;
     }, 0);
-    const avgClaimAmount = claims.length > 0 ? totalClaimsAmount / claims.length : 0;
+    const avgClaimAmount =
+      claims.length > 0 ? totalClaimsAmount / claims.length : 0;
 
     // Calculate risk score based on various factors
-    const highValuePolicies = policies.filter(p => Number(p.coverageAmount || 0) > 500000).length;
+    const highValuePolicies = policies.filter(
+      (p) => Number(p.coverageAmount || 0) > 500000,
+    ).length;
     const pendingRatio = claims.length > 0 ? pendingClaims / claims.length : 0;
-    const riskScore = Math.min(100, Math.round((highValuePolicies * 20) + (pendingRatio * 80)));
+    const riskScore = Math.min(
+      100,
+      Math.round(highValuePolicies * 20 + pendingRatio * 80),
+    );
 
     setDashboardStats({
       activePolicies,
@@ -142,24 +200,33 @@ export default function EmployeeDashboard() {
       totalClaimsAmount,
       avgClaimAmount,
       riskScore,
-      efficiencyScore: calculateEfficiencyScore(claims, queries)
+      efficiencyScore: calculateEfficiencyScore(claims, queries),
     });
   }, [policies, claims, queries]);
 
   const calculateEfficiencyScore = (claims, queries) => {
-    const claimResolutionRate = claims.length > 0 ? 
-      claims.filter(c => c.status === "Approved" || c.status === "Rejected").length / claims.length : 1;
-    const queryResolutionRate = queries.length > 0 ? 
-      queries.filter(q => q.response && q.response.trim() !== "").length / queries.length : 1;
-    
-    return Math.round((claimResolutionRate * 0.6 + queryResolutionRate * 0.4) * 100);
+    const claimResolutionRate =
+      claims.length > 0
+        ? claims.filter(
+            (c) => c.status === "Approved" || c.status === "Rejected",
+          ).length / claims.length
+        : 1;
+    const queryResolutionRate =
+      queries.length > 0
+        ? queries.filter((q) => q.response && q.response.trim() !== "").length /
+          queries.length
+        : 1;
+
+    return Math.round(
+      (claimResolutionRate * 0.6 + queryResolutionRate * 0.4) * 100,
+    );
   };
 
   const parseDate = (dateString) => {
-  if (!dateString) return new Date(); // fallback to now
-  // Replace space with T for ISO, remove microseconds
-  return new Date(dateString.replace(' ', 'T').replace(/\.\d+/, ''));
-};
+    if (!dateString) return new Date(); // fallback to now
+    // Replace space with T for ISO, remove microseconds
+    return new Date(dateString.replace(" ", "T").replace(/\.\d+/, ""));
+  };
 
   // Enhanced notification system that closes when tab changes
   const showNotificationAlert = useCallback((msg) => {
@@ -195,12 +262,15 @@ export default function EmployeeDashboard() {
   // ------------------ KEEPING ORIGINAL EMPLOYEE FETCH ------------------
   const fetchLoggedInEmployee = async (token) => {
     try {
-      const response = await axios.get("https://ingenious-surprise-production.up.railway.app/auth/employees", {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await axios.get(
+        "https://insurai-backend-production.up.railway.app/auth/employees",
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
 
       const storedEmail = localStorage.getItem("email");
-      const employee = response.data.find(emp => emp.email === storedEmail);
+      const employee = response.data.find((emp) => emp.email === storedEmail);
 
       if (!employee) {
         console.error("Employee not found");
@@ -208,11 +278,10 @@ export default function EmployeeDashboard() {
         return;
       }
 
-      setEmployeeId(employee.employeeId);       
+      setEmployeeId(employee.employeeId);
       setEmployeeName(employee.name || "Employee");
       localStorage.setItem("employeeId", employee.employeeId);
       localStorage.setItem("name", employee.name || "Employee");
-
     } catch (error) {
       console.error("Error fetching employee:", error);
       navigate("/employee/login");
@@ -221,18 +290,21 @@ export default function EmployeeDashboard() {
 
   // ------------------ Enhanced policies fetch ------------------
   const fetchEmployeeData = async (token) => {
-    setLoading(prev => ({ ...prev, policies: true }));
+    setLoading((prev) => ({ ...prev, policies: true }));
     try {
-      const response = await axios.get("https://ingenious-surprise-production.up.railway.app/employee/policies", {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await axios.get(
+        "https://insurai-backend-production.up.railway.app/employee/policies",
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
 
       const formattedPolicies = response.data.map((policy) => ({
         id: policy.id,
         name: policy.policyName,
         provider: policy.providerName,
         coverageAmount: policy.coverageAmount,
-        formattedCoverage: `₹${policy.coverageAmount?.toLocaleString('en-IN')}`,
+        formattedCoverage: `₹${policy.coverageAmount?.toLocaleString("en-IN")}`,
         monthlyPremium: policy.monthlyPremium || 0,
         renewalDate: policy.renewalDate,
         status: policy.policyStatus,
@@ -242,7 +314,7 @@ export default function EmployeeDashboard() {
         claimFormUrl: formatPublicUrl(policy.claimFormUrl),
         annexureUrl: formatPublicUrl(policy.annexureUrl),
         remainingCoverageAmount: Number(policy.coverageAmount),
-        policyType: policy.policyType || "General"
+        policyType: policy.policyType || "General",
       }));
 
       setPolicies(formattedPolicies);
@@ -250,31 +322,37 @@ export default function EmployeeDashboard() {
       console.error("Error fetching employee data:", error);
       if (error.response?.status === 403) navigate("/employee/login");
     } finally {
-      setLoading(prev => ({ ...prev, policies: false }));
+      setLoading((prev) => ({ ...prev, policies: false }));
     }
   };
 
   // Enhanced claims fetch
   const fetchEmployeeClaims = async (token) => {
-    setLoading(prev => ({ ...prev, claims: true }));
+    setLoading((prev) => ({ ...prev, claims: true }));
     try {
-      const response = await axios.get("https://ingenious-surprise-production.up.railway.app/employee/claims", {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await axios.get(
+        "https://insurai-backend-production.up.railway.app/employee/claims",
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
       setClaims(response.data);
     } catch (error) {
       console.error("Error fetching claims:", error);
     } finally {
-      setLoading(prev => ({ ...prev, claims: false }));
+      setLoading((prev) => ({ ...prev, claims: false }));
     }
   };
 
   // ------------------ KEEPING ORIGINAL AGENTS FETCH ------------------
   const fetchAgents = async (token) => {
     try {
-      const response = await axios.get("https://ingenious-surprise-production.up.railway.app/agent/availability/all", {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await axios.get(
+        "https://insurai-backend-production.up.railway.app/agent/availability/all",
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
       setAgentsAvailability(response.data);
     } catch (error) {
       console.error("Error fetching agents:", error);
@@ -283,17 +361,20 @@ export default function EmployeeDashboard() {
 
   // ------------------ KEEPING ORIGINAL QUERIES FETCH ------------------
   const fetchEmployeeQueries = async (token) => {
-    setLoading(prev => ({ ...prev, queries: true }));
+    setLoading((prev) => ({ ...prev, queries: true }));
     try {
-      const response = await axios.get("https://ingenious-surprise-production.up.railway.app/employee/queries", {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await axios.get(
+        "https://insurai-backend-production.up.railway.app/employee/queries",
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
       setQueries(response.data);
     } catch (error) {
       console.error("Error fetching employee queries:", error);
       if (error.response?.status === 403) navigate("/employee/login");
     } finally {
-      setLoading(prev => ({ ...prev, queries: false }));
+      setLoading((prev) => ({ ...prev, queries: false }));
     }
   };
 
@@ -309,35 +390,48 @@ export default function EmployeeDashboard() {
 
     const claimAmount = Number(newClaim.amount);
 
-    if (!newClaim.type || !claimAmount || !newClaim.description || !selectedPolicyId) {
+    if (
+      !newClaim.type ||
+      !claimAmount ||
+      !newClaim.description ||
+      !selectedPolicyId
+    ) {
       showNotificationAlert("Please fill all required claim fields.");
       return;
     }
 
-    const selectedPolicy = policies.find(p => Number(p.id) === Number(selectedPolicyId));
+    const selectedPolicy = policies.find(
+      (p) => Number(p.id) === Number(selectedPolicyId),
+    );
     if (!selectedPolicy) {
       showNotificationAlert("Please select a valid policy.");
       return;
     }
 
     const approvedClaims = claims.filter(
-      claim => Number(claim.policyId) === selectedPolicy.id && claim.status === "Approved"
+      (claim) =>
+        Number(claim.policyId) === selectedPolicy.id &&
+        claim.status === "Approved",
     );
-    const totalClaimed = approvedClaims.reduce((sum, claim) => sum + (Number(claim.amount) || 0), 0);
-    const remainingCoverage = (selectedPolicy.coverageAmount || 0) - totalClaimed;
+    const totalClaimed = approvedClaims.reduce(
+      (sum, claim) => sum + (Number(claim.amount) || 0),
+      0,
+    );
+    const remainingCoverage =
+      (selectedPolicy.coverageAmount || 0) - totalClaimed;
 
     if (claimAmount > remainingCoverage) {
       showNotificationAlert(
-        `Claim amount exceeds remaining coverage (₹${remainingCoverage.toLocaleString("en-IN")})!`
+        `Claim amount exceeds remaining coverage (₹${remainingCoverage.toLocaleString("en-IN")})!`,
       );
       return;
     }
 
-    const updatedPolicies = policies.map(policy => {
+    const updatedPolicies = policies.map((policy) => {
       if (policy.id === selectedPolicy.id) {
         return {
           ...policy,
-          remainingCoverageAmount: remainingCoverage - claimAmount
+          remainingCoverageAmount: remainingCoverage - claimAmount,
         };
       }
       return policy;
@@ -355,11 +449,13 @@ export default function EmployeeDashboard() {
       description: newClaim.description,
       policyId: selectedPolicy.id,
       policyName: selectedPolicy.name,
-      documents: newClaim.documents || []
+      documents: newClaim.documents || [],
     };
 
     setClaims([...claims, newClaimData]);
-    showNotificationAlert("Claim submitted successfully! It will be processed shortly.");
+    showNotificationAlert(
+      "Claim submitted successfully! It will be processed shortly.",
+    );
 
     setNewClaim({
       type: "",
@@ -367,7 +463,7 @@ export default function EmployeeDashboard() {
       description: "",
       date: new Date().toISOString().split("T")[0],
       documents: [],
-      policyId: ""
+      policyId: "",
     });
     setSelectedPolicyId("");
     handleTabChange("claims");
@@ -389,10 +485,12 @@ export default function EmployeeDashboard() {
     }
 
     const selectedAgent = agentsAvailability.find(
-      a => a.agent.id.toString() === selectedAgentId.toString()
+      (a) => a.agent.id.toString() === selectedAgentId.toString(),
     );
     if (!selectedAgent || !selectedAgent.available) {
-      showNotificationAlert("Selected agent is not available. Please choose another agent.");
+      showNotificationAlert(
+        "Selected agent is not available. Please choose another agent.",
+      );
       return;
     }
 
@@ -412,37 +510,41 @@ export default function EmployeeDashboard() {
     }
 
     const selectedPolicy = policies.find(
-      p => p.id.toString() === newQuery.policyId.toString()
+      (p) => p.id.toString() === newQuery.policyId.toString(),
     );
     const policyName = selectedPolicy?.name || "";
 
-    setLoading(prev => ({ ...prev, queries: true }));
+    setLoading((prev) => ({ ...prev, queries: true }));
 
     try {
       const response = await axios.post(
-        `https://ingenious-surprise-production.up.railway.app/employee/queries?agentId=${selectedAgentId}&queryText=${encodeURIComponent(newQuery.queryText)}&policyName=${encodeURIComponent(policyName)}&claimType=${encodeURIComponent(newQuery.claimType)}`,
+        `https://insurai-backend-production.up.railway.app/employee/queries?agentId=${selectedAgentId}&queryText=${encodeURIComponent(newQuery.queryText)}&policyName=${encodeURIComponent(policyName)}&claimType=${encodeURIComponent(newQuery.claimType)}`,
         null,
         {
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
-        }
+        },
       );
 
       const savedQuery = response.data;
       setQueries([savedQuery, ...queries]);
-      showNotificationAlert("Query submitted successfully! An agent will respond shortly.");
+      showNotificationAlert(
+        "Query submitted successfully! An agent will respond shortly.",
+      );
 
       setNewQuery({ queryText: "", policyId: "", claimType: "" });
       setSelectedAgentId("");
       handleTabChange("myQueries");
     } catch (error) {
       console.error("Error submitting query:", error);
-      const msg = error.response?.data || "Failed to submit query. Check console for details.";
+      const msg =
+        error.response?.data ||
+        "Failed to submit query. Check console for details.";
       showNotificationAlert(msg);
     } finally {
-      setLoading(prev => ({ ...prev, queries: false }));
+      setLoading((prev) => ({ ...prev, queries: false }));
     }
   };
 
@@ -451,7 +553,7 @@ export default function EmployeeDashboard() {
     if (files.length > 0) {
       setNewClaim({
         ...newClaim,
-        documents: [...newClaim.documents, ...Array.from(files)]
+        documents: [...newClaim.documents, ...Array.from(files)],
       });
     }
   };
@@ -466,12 +568,12 @@ export default function EmployeeDashboard() {
 
     // Enhanced header with branding
     doc.setFillColor(27, 38, 44);
-    doc.rect(0, 0, 210, 30, 'F');
+    doc.rect(0, 0, 210, 30, "F");
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(20);
-    doc.text("INSURAI ENTERPRISE", 105, 15, { align: 'center' });
+    doc.text("INSURAI ENTERPRISE", 105, 15, { align: "center" });
     doc.setFontSize(12);
-    doc.text("Policy Document", 105, 22, { align: 'center' });
+    doc.text("Policy Document", 105, 22, { align: "center" });
 
     // Policy details
     doc.setTextColor(0, 0, 0);
@@ -480,17 +582,17 @@ export default function EmployeeDashboard() {
 
     doc.setFontSize(12);
     let yPosition = 60;
-    
+
     const details = [
       `Provider: ${policy.provider}`,
       `Coverage: ${policy.formattedCoverage}`,
-      `Monthly Premium: ₹${policy.monthlyPremium?.toLocaleString('en-IN')}`,
+      `Monthly Premium: ₹${policy.monthlyPremium?.toLocaleString("en-IN")}`,
       `Renewal Date: ${policy.renewalDate}`,
       `Status: ${policy.status}`,
-      `Policy Type: ${policy.policyType || 'General'}`
+      `Policy Type: ${policy.policyType || "General"}`,
     ];
 
-    details.forEach(detail => {
+    details.forEach((detail) => {
       doc.text(detail, 20, yPosition);
       yPosition += 8;
     });
@@ -501,7 +603,7 @@ export default function EmployeeDashboard() {
     doc.text("Covered Benefits:", 20, yPosition);
     yPosition += 10;
     doc.setFontSize(10);
-    
+
     policy.benefits.forEach((benefit, index) => {
       if (yPosition > 270) {
         doc.addPage();
@@ -515,9 +617,11 @@ export default function EmployeeDashboard() {
     doc.setFontSize(8);
     doc.setTextColor(100, 100, 100);
     doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 20, 285);
-    doc.text("InsurAI Enterprise - Confidential Document", 105, 285, { align: 'center' });
+    doc.text("InsurAI Enterprise - Confidential Document", 105, 285, {
+      align: "center",
+    });
 
-    doc.save(`${policy.name.replace(/\s+/g, '_')}_Policy.pdf`);
+    doc.save(`${policy.name.replace(/\s+/g, "_")}_Policy.pdf`);
   };
 
   const viewPolicyDetails = (policy) => {
@@ -527,20 +631,49 @@ export default function EmployeeDashboard() {
   // Enhanced navigation items with badges
   const navigationItems = [
     { tab: "home", label: "Dashboard", icon: "bi-speedometer2", badge: null },
-    { tab: "policies", label: "My Policies", icon: "bi-file-text", badge: dashboardStats.activePolicies },
-    { tab: "claims", label: "My Claims", icon: "bi-wallet2", badge: dashboardStats.pendingClaims },
-    { tab: "newClaim", label: "Submit Claim", icon: "bi-plus-circle", badge: null },
-    { tab: "askQuery", label: "Ask a Question", icon: "bi-question-circle", badge: null },
-    { tab: "myQueries", label: "My Queries", icon: "bi-chat-left-text", badge: dashboardStats.totalQueries },
-    { tab: "notifications", label: "Notifications", icon: "bi-bell", badge: null },
+    {
+      tab: "policies",
+      label: "My Policies",
+      icon: "bi-file-text",
+      badge: dashboardStats.activePolicies,
+    },
+    {
+      tab: "claims",
+      label: "My Claims",
+      icon: "bi-wallet2",
+      badge: dashboardStats.pendingClaims,
+    },
+    {
+      tab: "newClaim",
+      label: "Submit Claim",
+      icon: "bi-plus-circle",
+      badge: null,
+    },
+    {
+      tab: "askQuery",
+      label: "Ask a Question",
+      icon: "bi-question-circle",
+      badge: null,
+    },
+    {
+      tab: "myQueries",
+      label: "My Queries",
+      icon: "bi-chat-left-text",
+      badge: dashboardStats.totalQueries,
+    },
+    {
+      tab: "notifications",
+      label: "Notifications",
+      icon: "bi-bell",
+      badge: null,
+    },
     { tab: "support", label: "Support", icon: "bi-headset", badge: null },
   ];
 
   // ------------------ Enhanced Home Dashboard with Advanced UI ------------------
   const renderEnhancedHomeDashboard = () => (
     <div className="container-fluid">
-          {/* ================= KPI HERO STRIP ================= */}
-   
+      {/* ================= KPI HERO STRIP ================= */}
 
       {/* Enhanced Header Section */}
       <div className="row mb-4">
@@ -562,20 +695,20 @@ export default function EmployeeDashboard() {
             <div className="text-end">
               <div className="bg-warning bg-opacity-10 rounded-4 p-3 border shadow-sm">
                 <div className="fw-bold text-primary">
-                  {currentTime.toLocaleDateString('en-IN', { 
-                    weekday: 'long', 
-                    year: 'numeric', 
-                    month: 'long', 
-                    day: 'numeric' 
+                  {currentTime.toLocaleDateString("en-IN", {
+                    weekday: "long",
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
                   })}
                 </div>
                 <div className="text-muted">
                   <i className="bi bi-clock me-1"></i>
-                  {currentTime.toLocaleTimeString('en-IN', { 
-                    hour: '2-digit', 
-                    minute: '2-digit',
-                    second: '2-digit',
-                    hour12: true 
+                  {currentTime.toLocaleTimeString("en-IN", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    second: "2-digit",
+                    hour12: true,
                   })}
                 </div>
               </div>
@@ -583,62 +716,69 @@ export default function EmployeeDashboard() {
           </div>
         </div>
       </div>
-       <div className="row mb-4">
-      <div className="col-12">
-        <div className="kpi-strip">
-          <div className="kpi-item">
-            <span>Total Coverage</span>
-            <h3>₹{(dashboardStats.totalCoverage / 100000).toFixed(1)}L</h3>
-          </div>
+      <div className="row mb-4">
+        <div className="col-12">
+          <div className="kpi-strip">
+            <div className="kpi-item">
+              <span>Total Coverage</span>
+              <h3>₹{(dashboardStats.totalCoverage / 100000).toFixed(1)}L</h3>
+            </div>
 
-          <div className="kpi-item">
-            <span>Total Claims</span>
-            <h3>₹{dashboardStats.totalClaimsAmount.toLocaleString("en-IN")}</h3>
-          </div>
+            <div className="kpi-item">
+              <span>Total Claims</span>
+              <h3>
+                ₹{dashboardStats.totalClaimsAmount.toLocaleString("en-IN")}
+              </h3>
+            </div>
 
-          <div className="kpi-item">
-            <span>Efficiency</span>
-            <h3>{dashboardStats.efficiencyScore}%</h3>
-          </div>
+            <div className="kpi-item">
+              <span>Efficiency</span>
+              <h3>{dashboardStats.efficiencyScore}%</h3>
+            </div>
 
-          <div className="kpi-item danger">
-            <span>Risk Index</span>
-            <h3>{dashboardStats.riskScore}</h3>
+            <div className="kpi-item danger">
+              <span>Risk Index</span>
+              <h3>{dashboardStats.riskScore}</h3>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-    {/* ================= SYSTEM INSIGHT ================= */}
-    <div className="row mb-4">
-      <div className="col-12">
-        <div className="ai-insight">
-          <i className="bi bi-lightning-charge-fill"></i>
-          {/* <div> */}
+      {/* ================= SYSTEM INSIGHT ================= */}
+      <div className="row mb-4">
+        <div className="col-12">
+          <div className="ai-insight">
+            <i className="bi bi-lightning-charge-fill"></i>
+            {/* <div> */}
             <strong>System Insight:</strong>
             <span>
               {dashboardStats.pendingClaims > 3
                 ? " Higher than normal pending claims detected."
                 : " System performance is within optimal range."}
             </span>
-          {/* </div> */}
+            {/* </div> */}
+          </div>
         </div>
       </div>
-    </div>
 
       {/* Enhanced Statistics Cards with Advanced Metrics */}
       <div className="row mb-4">
         <div className="col-xl-2 col-md-4 col-6 mb-4">
           <div className="card border-0 shadow-sm h-100 dashboard-card bg-info bg-opacity-10 rounded-4">
             <div className="card-body text-center">
-              <div className="bg-primary bg-opacity-25 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style={{width: '60px', height: '60px'}}>
+              <div
+                className="bg-primary bg-opacity-25 rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                style={{ width: "60px", height: "60px" }}
+              >
                 <i className="bi bi-shield-check text-primary fs-4"></i>
               </div>
               {/* <h3 className="text-primary mb-1">{dashboardStats.activePolicies}</h3> */}
-              <h3 className="fw-bold display-6 text-primary mb-1">{dashboardStats.activePolicies}</h3>
+              <h3 className="fw-bold display-6 text-primary mb-1">
+                {dashboardStats.activePolicies}
+              </h3>
               <div className="text-muted mb-2">Active Policies</div>
               <small className="text-primary">
-                <i className="bi bi-currency-rupee me-1"></i>
-                ₹{(dashboardStats.totalCoverage / 100000).toFixed(1)}L coverage
+                <i className="bi bi-currency-rupee me-1"></i>₹
+                {(dashboardStats.totalCoverage / 100000).toFixed(1)}L coverage
               </small>
             </div>
           </div>
@@ -647,10 +787,15 @@ export default function EmployeeDashboard() {
         <div className="col-xl-2 col-md-4 col-6 mb-4">
           <div className="card border-0 shadow-sm h-100 dashboard-card bg-warning bg-opacity-10 rounded-4">
             <div className="card-body text-center">
-              <div className="bg-warning bg-opacity-25 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style={{width: '60px', height: '60px'}}>
+              <div
+                className="bg-warning bg-opacity-25 rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                style={{ width: "60px", height: "60px" }}
+              >
                 <i className="bi bi-clock-history text-warning fs-4"></i>
               </div>
-              <h3 className="text-warning mb-1">{dashboardStats.pendingClaims}</h3>
+              <h3 className="text-warning mb-1">
+                {dashboardStats.pendingClaims}
+              </h3>
               <div className="text-muted mb-2">Pending Claims</div>
               <small className="text-warning">
                 <i className="bi bi-graph-up me-1"></i>
@@ -663,10 +808,15 @@ export default function EmployeeDashboard() {
         <div className="col-xl-2 col-md-4 col-6 mb-4">
           <div className="card border-0 shadow-sm h-100 dashboard-card bg-success bg-opacity-10 rounded-4">
             <div className="card-body text-center">
-              <div className="bg-success bg-opacity-25 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style={{width: '60px', height: '60px'}}>
+              <div
+                className="bg-success bg-opacity-25 rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                style={{ width: "60px", height: "60px" }}
+              >
                 <i className="bi bi-chat-left-text text-success fs-4"></i>
               </div>
-              <h3 className="text-success mb-1">{dashboardStats.totalQueries}</h3>
+              <h3 className="text-success mb-1">
+                {dashboardStats.totalQueries}
+              </h3>
               <div className="text-muted mb-2">Total Queries</div>
               <small className="text-success">
                 <i className="bi bi-check-circle me-1"></i>
@@ -679,10 +829,15 @@ export default function EmployeeDashboard() {
         <div className="col-xl-2 col-md-4 col-6 mb-4">
           <div className="card border-0 shadow-sm h-100 dashboard-card bg-info bg-opacity-10 rounded-4">
             <div className="card-body text-center">
-              <div className="bg-info bg-opacity-25 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style={{width: '60px', height: '60px'}}>
+              <div
+                className="bg-info bg-opacity-25 rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                style={{ width: "60px", height: "60px" }}
+              >
                 <i className="bi bi-calendar-event text-info fs-4"></i>
               </div>
-              <h3 className="text-info mb-1">{dashboardStats.upcomingRenewals}</h3>
+              <h3 className="text-info mb-1">
+                {dashboardStats.upcomingRenewals}
+              </h3>
               <div className="text-muted mb-2">Renewals Due</div>
               <small className="text-info">
                 <i className="bi bi-clock me-1"></i>
@@ -695,7 +850,10 @@ export default function EmployeeDashboard() {
         <div className="col-xl-2 col-md-4 col-6 mb-4">
           <div className="card border-0 shadow-sm h-100 dashboard-card bg-danger bg-opacity-10 rounded-4">
             <div className="card-body text-center">
-              <div className="bg-danger bg-opacity-25 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style={{width: '60px', height: '60px'}}>
+              <div
+                className="bg-danger bg-opacity-25 rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                style={{ width: "60px", height: "60px" }}
+              >
                 <i className="bi bi-activity text-danger fs-4"></i>
               </div>
               <h3 className="text-danger mb-1">{dashboardStats.riskScore}%</h3>
@@ -711,10 +869,15 @@ export default function EmployeeDashboard() {
         <div className="col-xl-2 col-md-4 col-6 mb-4">
           <div className="card border-0 shadow-sm h-100 dashboard-card bg-secondary bg-opacity-10 rounded-4">
             <div className="card-body text-center">
-              <div className="bg-secondary bg-opacity-25 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style={{width: '60px', height: '60px'}}>
+              <div
+                className="bg-secondary bg-opacity-25 rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                style={{ width: "60px", height: "60px" }}
+              >
                 <i className="bi bi-graph-up-arrow text-secondary fs-4"></i>
               </div>
-              <h3 className="text-secondary mb-1">{dashboardStats.efficiencyScore}%</h3>
+              <h3 className="text-secondary mb-1">
+                {dashboardStats.efficiencyScore}%
+              </h3>
               <div className="text-muted mb-2">Efficiency</div>
               <small className="text-secondary">
                 <i className="bi bi-lightning me-1"></i>
@@ -738,21 +901,33 @@ export default function EmployeeDashboard() {
             <div className="card-body">
               <div className="d-flex justify-content-between align-items-center mb-3">
                 <span>Monthly Premium</span>
-                <strong className="text-success">₹{dashboardStats.monthlyPremium.toLocaleString('en-IN')}</strong>
+                <strong className="text-success">
+                  ₹{dashboardStats.monthlyPremium.toLocaleString("en-IN")}
+                </strong>
               </div>
               <div className="d-flex justify-content-between align-items-center mb-3">
                 <span>Total Claims</span>
-                <strong className="text-warning">₹{dashboardStats.totalClaimsAmount.toLocaleString('en-IN')}</strong>
+                <strong className="text-warning">
+                  ₹{dashboardStats.totalClaimsAmount.toLocaleString("en-IN")}
+                </strong>
               </div>
               <div className="d-flex justify-content-between align-items-center mb-3">
                 <span>Avg Claim</span>
-                <strong className="text-info">₹{dashboardStats.avgClaimAmount.toLocaleString('en-IN')}</strong>
+                <strong className="text-info">
+                  ₹{dashboardStats.avgClaimAmount.toLocaleString("en-IN")}
+                </strong>
               </div>
               <div className="d-flex justify-content-between align-items-center">
                 <span>Coverage Used</span>
                 <strong className="text-primary">
-                  {dashboardStats.totalCoverage > 0 ? 
-                    Math.round((dashboardStats.totalClaimsAmount / dashboardStats.totalCoverage) * 100) : 0}%
+                  {dashboardStats.totalCoverage > 0
+                    ? Math.round(
+                        (dashboardStats.totalClaimsAmount /
+                          dashboardStats.totalCoverage) *
+                          100,
+                      )
+                    : 0}
+                  %
                 </strong>
               </div>
             </div>
@@ -773,20 +948,34 @@ export default function EmployeeDashboard() {
                   <span>Claim Approval Rate</span>
                   <strong>{dashboardStats.approvalRate}%</strong>
                 </div>
-                <div className="progress" style={{height: '8px'}}>
-                  <div className="progress-bar bg-primary" style={{width: `${dashboardStats.approvalRate}%`}}></div>
+                <div className="progress" style={{ height: "8px" }}>
+                  <div
+                    className="progress-bar bg-primary"
+                    style={{ width: `${dashboardStats.approvalRate}%` }}
+                  ></div>
                 </div>
               </div>
               <div className="mb-3">
                 <div className="d-flex justify-content-between mb-1">
                   <span>Query Resolution</span>
                   <strong>
-                    {dashboardStats.totalQueries > 0 ? 
-                      Math.round((dashboardStats.resolvedQueries / dashboardStats.totalQueries) * 100) : 0}%
+                    {dashboardStats.totalQueries > 0
+                      ? Math.round(
+                          (dashboardStats.resolvedQueries /
+                            dashboardStats.totalQueries) *
+                            100,
+                        )
+                      : 0}
+                    %
                   </strong>
                 </div>
-                <div className="progress" style={{height: '8px'}}>
-                  <div className="progress-bar bg-info" style={{width: `${dashboardStats.totalQueries > 0 ? Math.round((dashboardStats.resolvedQueries / dashboardStats.totalQueries) * 100) : 0}%`}}></div>
+                <div className="progress" style={{ height: "8px" }}>
+                  <div
+                    className="progress-bar bg-info"
+                    style={{
+                      width: `${dashboardStats.totalQueries > 0 ? Math.round((dashboardStats.resolvedQueries / dashboardStats.totalQueries) * 100) : 0}%`,
+                    }}
+                  ></div>
                 </div>
               </div>
               <div className="mb-3">
@@ -794,8 +983,11 @@ export default function EmployeeDashboard() {
                   <span>System Efficiency</span>
                   <strong>{dashboardStats.efficiencyScore}%</strong>
                 </div>
-                <div className="progress" style={{height: '8px'}}>
-                  <div className="progress-bar bg-warning" style={{width: `${dashboardStats.efficiencyScore}%`}}></div>
+                <div className="progress" style={{ height: "8px" }}>
+                  <div
+                    className="progress-bar bg-warning"
+                    style={{ width: `${dashboardStats.efficiencyScore}%` }}
+                  ></div>
                 </div>
               </div>
             </div>
@@ -813,13 +1005,33 @@ export default function EmployeeDashboard() {
             <div className="card-body">
               <div className="row g-2">
                 {[
-                  { label: "Submit Claim", icon: "bi-plus-circle", color: "primary", tab: "newClaim" },
-                  { label: "Ask Question", icon: "bi-question-circle", color: "info", tab: "askQuery" },
-                  { label: "View Policies", icon: "bi-file-text", color: "success", tab: "policies" },
-                  { label: "Check Claims", icon: "bi-wallet2", color: "warning", tab: "claims" },
+                  {
+                    label: "Submit Claim",
+                    icon: "bi-plus-circle",
+                    color: "primary",
+                    tab: "newClaim",
+                  },
+                  {
+                    label: "Ask Question",
+                    icon: "bi-question-circle",
+                    color: "info",
+                    tab: "askQuery",
+                  },
+                  {
+                    label: "View Policies",
+                    icon: "bi-file-text",
+                    color: "success",
+                    tab: "policies",
+                  },
+                  {
+                    label: "Check Claims",
+                    icon: "bi-wallet2",
+                    color: "warning",
+                    tab: "claims",
+                  },
                 ].map((action, index) => (
                   <div key={index} className="col-6">
-                    <button 
+                    <button
                       className={`btn btn-outline-${action.color} w-100 text-start p-2`}
                       onClick={() => handleTabChange(action.tab)}
                     >
@@ -847,28 +1059,48 @@ export default function EmployeeDashboard() {
             </div>
             <div className="card-body">
               {[...claims, ...queries]
-                .sort((a, b) => parseDate(b.submittedDate || b.created_at) - parseDate(a.submittedDate || a.created_at))
+                .sort(
+                  (a, b) =>
+                    parseDate(b.submittedDate || b.created_at) -
+                    parseDate(a.submittedDate || a.created_at),
+                )
                 .slice(0, 5)
                 .map((item, index) => {
-                  const itemDate = parseDate(item.submittedDate || item.created_at);
+                  const itemDate = parseDate(
+                    item.submittedDate || item.created_at,
+                  );
                   return (
-                    <div key={index} className="d-flex align-items-center mb-3 pb-3 border-bottom">
-                      <div className={`bg-${item.status === 'Approved' ? 'success' : item.status === 'Pending' ? 'warning' : 'info'} bg-opacity-10 rounded-circle p-2 me-3`}>
-                        <i className={`bi bi-${item.amount ? 'wallet2' : 'chat-dots'} text-${item.status === 'Approved' ? 'success' : item.status === 'Pending' ? 'warning' : 'info'}`}></i>
+                    <div
+                      key={index}
+                      className="d-flex align-items-center mb-3 pb-3 border-bottom"
+                    >
+                      <div
+                        className={`bg-${item.status === "Approved" ? "success" : item.status === "Pending" ? "warning" : "info"} bg-opacity-10 rounded-circle p-2 me-3`}
+                      >
+                        <i
+                          className={`bi bi-${item.amount ? "wallet2" : "chat-dots"} text-${item.status === "Approved" ? "success" : item.status === "Pending" ? "warning" : "info"}`}
+                        ></i>
                       </div>
                       <div className="flex-grow-1">
-                        <div className="fw-bold">{item.amount ? 'Claim Submitted' : 'Query Asked'}</div>
+                        <div className="fw-bold">
+                          {item.amount ? "Claim Submitted" : "Query Asked"}
+                        </div>
                         <small className="text-muted">
                           {item.amount
-                            ? `₹${Number(item.amount || 0).toLocaleString('en-IN')}`
-                            : item.queryText?.substring(0, 50) + (item.queryText?.length > 50 ? '...' : '')}
+                            ? `₹${Number(item.amount || 0).toLocaleString("en-IN")}`
+                            : item.queryText?.substring(0, 50) +
+                              (item.queryText?.length > 50 ? "..." : "")}
                         </small>
                       </div>
                       <div className="text-end">
-                        <small className="text-muted">{itemDate.toLocaleDateString('en-IN')}</small>
+                        <small className="text-muted">
+                          {itemDate.toLocaleDateString("en-IN")}
+                        </small>
                         <div>
-                          <span className={`badge bg-${item.status === 'Approved' ? 'success' : item.status === 'Pending' ? 'warning' : 'info'}`}>
-                            {item.status || 'Open'}
+                          <span
+                            className={`badge bg-${item.status === "Approved" ? "success" : item.status === "Pending" ? "warning" : "info"}`}
+                          >
+                            {item.status || "Open"}
                           </span>
                         </div>
                       </div>
@@ -889,13 +1121,36 @@ export default function EmployeeDashboard() {
             </div>
             <div className="card-body">
               {[
-                { service: 'Policy Management', status: 'Operational', icon: 'bi-check-circle' },
-                { service: 'Claims Processing', status: 'Operational', icon: 'bi-check-circle' },
-                { service: 'Query System', status: 'Operational', icon: 'bi-check-circle' },
-                { service: 'Document Storage', status: 'Operational', icon: 'bi-check-circle' },
-                { service: 'Agent Support', status: `${agentsAvailability.filter(a => a.available).length} Online`, icon: 'bi-check-circle' },
+                {
+                  service: "Policy Management",
+                  status: "Operational",
+                  icon: "bi-check-circle",
+                },
+                {
+                  service: "Claims Processing",
+                  status: "Operational",
+                  icon: "bi-check-circle",
+                },
+                {
+                  service: "Query System",
+                  status: "Operational",
+                  icon: "bi-check-circle",
+                },
+                {
+                  service: "Document Storage",
+                  status: "Operational",
+                  icon: "bi-check-circle",
+                },
+                {
+                  service: "Agent Support",
+                  status: `${agentsAvailability.filter((a) => a.available).length} Online`,
+                  icon: "bi-check-circle",
+                },
               ].map((service, index) => (
-                <div key={index} className="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
+                <div
+                  key={index}
+                  className="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom"
+                >
                   <div>
                     <i className={`${service.icon} text-success me-2`}></i>
                     {service.service}
@@ -910,13 +1165,13 @@ export default function EmployeeDashboard() {
     </div>
   );
 
-return (
+  return (
     <div className="employee-dashboard enterprise-dashboard">
       {/* Notification Alert */}
       {showNotification && (
         <div
           className="alert alert-success alert-dismissible fade show m-3 position-fixed top-0 end-0"
-          style={{ zIndex: 9999, minWidth: '350px' }}
+          style={{ zIndex: 9999, minWidth: "350px" }}
           role="alert"
         >
           <div className="d-flex align-items-center">
@@ -924,13 +1179,17 @@ return (
             <div className="flex-grow-1">
               <strong>{notificationMessage}</strong>
             </div>
-            <button type="button" className="btn-close" onClick={() => setShowNotification(false)}></button>
+            <button
+              type="button"
+              className="btn-close"
+              onClick={() => setShowNotification(false)}
+            ></button>
           </div>
         </div>
       )}
 
       {/* Header */}
-      <header className="dashboard-header text-white py-3 px-4 shadow-lg w-100" >
+      <header className="dashboard-header text-white py-3 px-4 shadow-lg w-100">
         <div className="container-fluid">
           <div className="row align-items-center">
             <div className="col-md-6 d-flex align-items-center">
@@ -939,7 +1198,9 @@ return (
               </div>
               <div>
                 <h2 className="mb-0 fw-bold">InsurAI Employee Portal</h2>
-                <small className="text-light opacity-75">Employee Insurance Suite v2.0</small>
+                <small className="text-light opacity-75">
+                  Employee Insurance Suite v2.0
+                </small>
               </div>
             </div>
             <div className="col-md-6 d-flex justify-content-end align-items-center">
@@ -950,8 +1211,14 @@ return (
                     <i className="bi bi-person-circle me-1"></i> Welcome
                   </small>
                 </div>
-                <div className="vr bg-light opacity-50" style={{height: '30px'}}></div>
-                <button className="btn btn-outline-light btn-sm" onClick={handleLogout}>
+                <div
+                  className="vr bg-light opacity-50"
+                  style={{ height: "30px" }}
+                ></div>
+                <button
+                  className="btn btn-outline-light btn-sm"
+                  onClick={handleLogout}
+                >
                   <i className="bi bi-box-arrow-right me-2"></i> Logout
                 </button>
               </div>
@@ -963,13 +1230,15 @@ return (
       {/* Main Layout */}
       <div className="dashboard-main d-flex">
         {/* Sidebar */}
-        <aside className={`dashboard-sidebar shadow-sm ${isMobileMenuOpen ? 'show' : ''}`}>
+        <aside
+          className={`dashboard-sidebar shadow-sm ${isMobileMenuOpen ? "show" : ""}`}
+        >
           <nav className="nav flex-column p-3">
             {navigationItems.map((link) => (
               <a
                 href="#"
                 key={link.tab}
-                className={`nav-link sidebar-link ${activeTab === link.tab ? 'active' : ''}`}
+                className={`nav-link sidebar-link ${activeTab === link.tab ? "active" : ""}`}
                 onClick={(e) => {
                   e.preventDefault();
                   handleTabChange(link.tab);
@@ -981,7 +1250,9 @@ return (
               >
                 <i className={`${link.icon} me-3`}></i>
                 <span>{link.label}</span>
-                {link.badge > 0 && <span className="badge bg-danger ms-auto">{link.badge}</span>}
+                {link.badge > 0 && (
+                  <span className="badge bg-danger ms-auto">{link.badge}</span>
+                )}
               </a>
             ))}
           </nav>
@@ -990,7 +1261,10 @@ return (
           <div className="sidebar-footer mt-auto p-3 small text-muted border-top">
             <div className="d-flex align-items-center mb-2">
               <div className="bg-success rounded-circle p-1 me-2">
-                <i className="bi bi-circle-fill text-success" style={{fontSize: '8px'}}></i>
+                <i
+                  className="bi bi-circle-fill text-success"
+                  style={{ fontSize: "8px" }}
+                ></i>
               </div>
               <span>System Online</span>
             </div>
@@ -1028,7 +1302,9 @@ return (
                 setSelectedPolicyId={setSelectedPolicyId}
               />
             )}
-            {(activeTab === "askQuery" || activeTab === "myQueries" || activeTab === "queryDetails") && (
+            {(activeTab === "askQuery" ||
+              activeTab === "myQueries" ||
+              activeTab === "queryDetails") && (
               <EmployeeQueries
                 activeTab={activeTab}
                 queries={queries}
@@ -1063,7 +1339,9 @@ return (
       </div>
 
       {/* Chatbot */}
-      <Chatbot employeeData={{ name: employeeName, claims, policies, queries }} />
+      <Chatbot
+        employeeData={{ name: employeeName, claims, policies, queries }}
+      />
 
       {/* Global Styles */}
       <style>{`

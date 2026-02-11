@@ -16,9 +16,12 @@ const AdminAuditLogs = ({ themeColors }) => {
   // Fetch logs from backend
   useEffect(() => {
     setLoading(true);
-    fetch("https://ingenious-surprise-production.up.railway.app/admin/audit/logs", {
-      headers: { Authorization: `Bearer ${token}` },
-    })
+    fetch(
+      "https://insurai-backend-production.up.railway.app/admin/audit/logs",
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      },
+    )
       .then((res) => res.json())
       .then((data) => {
         setLogs(data);
@@ -32,26 +35,25 @@ const AdminAuditLogs = ({ themeColors }) => {
   const applyFilters = () => {
     let filtered = logs;
 
-    if (filterRole) filtered = filtered.filter((log) => log.role === filterRole);
+    if (filterRole)
+      filtered = filtered.filter((log) => log.role === filterRole);
     if (filterAction)
       filtered = filtered.filter((log) =>
-        log.action.toLowerCase().includes(filterAction.toLowerCase())
+        log.action.toLowerCase().includes(filterAction.toLowerCase()),
       );
 
     if (searchTerm)
       filtered = filtered.filter(
         (log) =>
           log.userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          log.details.toLowerCase().includes(searchTerm.toLowerCase())
+          log.details.toLowerCase().includes(searchTerm.toLowerCase()),
       );
 
     if (dateRange && dateRange !== "custom") {
       const days = parseInt(dateRange);
       const cutoff = new Date();
       cutoff.setDate(cutoff.getDate() - days);
-      filtered = filtered.filter(
-        (log) => new Date(log.timestamp) >= cutoff
-      );
+      filtered = filtered.filter((log) => new Date(log.timestamp) >= cutoff);
     }
 
     setFilteredLogs(filtered);
@@ -220,8 +222,8 @@ const AdminAuditLogs = ({ themeColors }) => {
                               log.role === "HR"
                                 ? themeColors.accent
                                 : log.role === "AGENT"
-                                ? "#20c997"
-                                : "#6c757d",
+                                  ? "#20c997"
+                                  : "#6c757d",
                             color: "white",
                           }}
                         >

@@ -44,14 +44,17 @@ export default function AgentLogin() {
     }
 
     try {
-      const response = await fetch("https://ingenious-surprise-production.up.railway.app/agent/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: email.trim().toLowerCase(),
-          password,
-        }),
-      });
+      const response = await fetch(
+        "https://insurai-backend-production.up.railway.app/agent/login",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: email.trim().toLowerCase(),
+            password,
+          }),
+        },
+      );
 
       if (response.ok) {
         const data = await response.json();
@@ -130,9 +133,7 @@ export default function AgentLogin() {
                 {showPassword ? "🙈" : "👁️"}
               </button>
             </div>
-            {errorPassword && (
-              <span style={styles.error}>{errorPassword}</span>
-            )}
+            {errorPassword && <span style={styles.error}>{errorPassword}</span>}
           </div>
 
           <div style={styles.forgot}>
@@ -163,9 +164,7 @@ export default function AgentLogin() {
           </Link>
         </p>
 
-        <small style={styles.secure}>
-          🔒 Secure AI-powered agent portal
-        </small>
+        <small style={styles.secure}>🔒 Secure AI-powered agent portal</small>
       </motion.div>
     </div>
   );

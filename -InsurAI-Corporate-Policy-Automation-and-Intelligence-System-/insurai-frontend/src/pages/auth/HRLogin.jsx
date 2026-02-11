@@ -44,14 +44,17 @@ export default function HrLogin() {
     setLoading(true);
 
     try {
-      const res = await fetch("https://ingenious-surprise-production.up.railway.app/hr/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: email.trim().toLowerCase(),
-          password,
-        }),
-      });
+      const res = await fetch(
+        "https://insurai-backend-production.up.railway.app/hr/login",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: email.trim().toLowerCase(),
+            password,
+          }),
+        },
+      );
 
       if (!res.ok) {
         const text = await res.text();

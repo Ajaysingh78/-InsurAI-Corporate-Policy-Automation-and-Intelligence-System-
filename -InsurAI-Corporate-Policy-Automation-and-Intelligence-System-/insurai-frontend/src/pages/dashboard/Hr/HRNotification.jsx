@@ -28,17 +28,19 @@ export default function HRNotification({ currentHrId }) {
         }
 
         const response = await axios.get(
-          `https://ingenious-surprise-production.up.railway.app/notifications/user/${currentHrId}`,
+          `https://insurai-backend-production.up.railway.app/notifications/user/${currentHrId}`,
           {
             params: { role: "HR" },
             headers: { Authorization: `Bearer ${token}` },
-          }
+          },
         );
 
         setNotifications(response.data || []);
       } catch (err) {
         if (err.response && err.response.status === 403) {
-          setError("Access denied. You are not authorized to view these notifications.");
+          setError(
+            "Access denied. You are not authorized to view these notifications.",
+          );
         } else {
           setError("Failed to fetch notifications");
         }
@@ -59,15 +61,15 @@ export default function HRNotification({ currentHrId }) {
       }
 
       const response = await axios.put(
-        `https://ingenious-surprise-production.up.railway.app/notifications/${id}/read`,
+        `https://insurai-backend-production.up.railway.app/notifications/${id}/read`,
         {},
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
 
       setNotifications((prev) =>
         prev.map((n) =>
-          n.id === id ? { ...n, readStatus: response.data.readStatus } : n
-        )
+          n.id === id ? { ...n, readStatus: response.data.readStatus } : n,
+        ),
       );
     } catch (err) {
       console.error(err);
@@ -80,19 +82,19 @@ export default function HRNotification({ currentHrId }) {
 
     try {
       const token = localStorage.getItem("token");
-      const promises = Array.from(selectedNotifications).map(id =>
+      const promises = Array.from(selectedNotifications).map((id) =>
         axios.put(
-          `https://ingenious-surprise-production.up.railway.app/notifications/${id}/read`,
+          `https://insurai-backend-production.up.railway.app/notifications/${id}/read`,
           {},
-          { headers: { Authorization: `Bearer ${token}` } }
-        )
+          { headers: { Authorization: `Bearer ${token}` } },
+        ),
       );
 
       await Promise.all(promises);
-      setNotifications(prev =>
-        prev.map(n =>
-          selectedNotifications.has(n.id) ? { ...n, readStatus: true } : n
-        )
+      setNotifications((prev) =>
+        prev.map((n) =>
+          selectedNotifications.has(n.id) ? { ...n, readStatus: true } : n,
+        ),
       );
       setSelectedNotifications(new Set());
     } catch (err) {
@@ -102,23 +104,21 @@ export default function HRNotification({ currentHrId }) {
   };
 
   const markAllAsRead = async () => {
-    const unreadNotifications = notifications.filter(n => !n.readStatus);
+    const unreadNotifications = notifications.filter((n) => !n.readStatus);
     if (unreadNotifications.length === 0) return;
 
     try {
       const token = localStorage.getItem("token");
-      const promises = unreadNotifications.map(notification =>
+      const promises = unreadNotifications.map((notification) =>
         axios.put(
-          `https://ingenious-surprise-production.up.railway.app/notifications/${notification.id}/read`,
+          `https://insurai-backend-production.up.railway.app/notifications/${notification.id}/read`,
           {},
-          { headers: { Authorization: `Bearer ${token}` } }
-        )
+          { headers: { Authorization: `Bearer ${token}` } },
+        ),
       );
 
       await Promise.all(promises);
-      setNotifications(prev =>
-        prev.map(n => ({ ...n, readStatus: true }))
-      );
+      setNotifications((prev) => prev.map((n) => ({ ...n, readStatus: true })));
     } catch (err) {
       console.error(err);
       alert("Failed to mark all notifications as read.");
@@ -137,13 +137,19 @@ export default function HRNotification({ currentHrId }) {
 
   const filteredNotifications = useMemo(() => {
     if (filter === "all") return notifications;
-    if (filter === "unread") return notifications.filter(n => !n.readStatus);
-    if (filter === "read") return notifications.filter(n => n.readStatus);
+    if (filter === "unread") return notifications.filter((n) => !n.readStatus);
+    if (filter === "read") return notifications.filter((n) => n.readStatus);
     return notifications;
   }, [notifications, filter]);
 
-  const unreadCount = useMemo(() => notifications.filter(n => !n.readStatus).length, [notifications]);
-  const readCount = useMemo(() => notifications.filter(n => n.readStatus).length, [notifications]);
+  const unreadCount = useMemo(
+    () => notifications.filter((n) => !n.readStatus).length,
+    [notifications],
+  );
+  const readCount = useMemo(
+    () => notifications.filter((n) => n.readStatus).length,
+    [notifications],
+  );
 
   if (loading) {
     return (
@@ -159,7 +165,10 @@ export default function HRNotification({ currentHrId }) {
   if (error) {
     return (
       <div className="container mt-4">
-        <div className="alert alert-danger d-flex align-items-center" role="alert">
+        <div
+          className="alert alert-danger d-flex align-items-center"
+          role="alert"
+        >
           <i className="bi bi-exclamation-triangle-fill me-2"></i>
           <div>{error}</div>
         </div>
@@ -176,7 +185,9 @@ export default function HRNotification({ currentHrId }) {
             <i className="bi bi-bell-fill me-2"></i>
             HR Notifications
           </h2>
-          <p className="text-muted mb-0">View important updates, alerts, and reminders</p>
+          <p className="text-muted mb-0">
+            View important updates, alerts, and reminders
+          </p>
         </div>
         {unreadCount > 0 && (
           <span className="badge bg-danger fs-6 px-3 py-2 shadow-sm">
@@ -190,26 +201,59 @@ export default function HRNotification({ currentHrId }) {
       <div className="row mb-4 align-items-center">
         <div className="col-md-8">
           <div className="btn-group" role="group">
-            <input type="radio" className="btn-check" name="filter" id="filter-all" checked={filter === "all"} onChange={() => setFilter("all")} />
-            <label className="btn btn-outline-primary" htmlFor="filter-all">All ({notifications.length})</label>
+            <input
+              type="radio"
+              className="btn-check"
+              name="filter"
+              id="filter-all"
+              checked={filter === "all"}
+              onChange={() => setFilter("all")}
+            />
+            <label className="btn btn-outline-primary" htmlFor="filter-all">
+              All ({notifications.length})
+            </label>
 
-            <input type="radio" className="btn-check" name="filter" id="filter-unread" checked={filter === "unread"} onChange={() => setFilter("unread")} />
-            <label className="btn btn-outline-warning" htmlFor="filter-unread">Unread ({unreadCount})</label>
+            <input
+              type="radio"
+              className="btn-check"
+              name="filter"
+              id="filter-unread"
+              checked={filter === "unread"}
+              onChange={() => setFilter("unread")}
+            />
+            <label className="btn btn-outline-warning" htmlFor="filter-unread">
+              Unread ({unreadCount})
+            </label>
 
-            <input type="radio" className="btn-check" name="filter" id="filter-read" checked={filter === "read"} onChange={() => setFilter("read")} />
-            <label className="btn btn-outline-success" htmlFor="filter-read">Read ({readCount})</label>
+            <input
+              type="radio"
+              className="btn-check"
+              name="filter"
+              id="filter-read"
+              checked={filter === "read"}
+              onChange={() => setFilter("read")}
+            />
+            <label className="btn btn-outline-success" htmlFor="filter-read">
+              Read ({readCount})
+            </label>
           </div>
         </div>
 
         <div className="col-md-4 text-end">
           <div className="d-flex gap-2 justify-content-end">
             {selectedNotifications.size > 0 && (
-              <button className="btn btn-success btn-sm" onClick={markMultipleAsRead}>
+              <button
+                className="btn btn-success btn-sm"
+                onClick={markMultipleAsRead}
+              >
                 <i className="bi bi-check2-all me-1"></i>Mark Selected
               </button>
             )}
             {unreadCount > 0 && (
-              <button className="btn btn-outline-success btn-sm" onClick={markAllAsRead}>
+              <button
+                className="btn btn-outline-success btn-sm"
+                onClick={markAllAsRead}
+              >
                 <i className="bi bi-check2-all me-1"></i>Mark All Read
               </button>
             )}
@@ -264,7 +308,9 @@ export default function HRNotification({ currentHrId }) {
                     <i className="bi bi-clock me-1"></i>
                     {new Date(n.createdAt).toLocaleString()}
                   </small>
-                  <span className={`badge ${n.readStatus ? "bg-secondary" : "bg-primary"}`}>
+                  <span
+                    className={`badge ${n.readStatus ? "bg-secondary" : "bg-primary"}`}
+                  >
                     {n.readStatus ? "Read" : "Unread"}
                   </span>
                 </div>
@@ -283,10 +329,16 @@ export default function HRNotification({ currentHrId }) {
                 <i className="bi bi-check2-circle me-2"></i>
                 {selectedNotifications.size} selected
               </span>
-              <button className="btn btn-light btn-sm" onClick={markMultipleAsRead}>
+              <button
+                className="btn btn-light btn-sm"
+                onClick={markMultipleAsRead}
+              >
                 Mark as Read
               </button>
-              <button className="btn btn-outline-light btn-sm" onClick={() => setSelectedNotifications(new Set())}>
+              <button
+                className="btn btn-outline-light btn-sm"
+                onClick={() => setSelectedNotifications(new Set())}
+              >
                 Clear
               </button>
             </div>

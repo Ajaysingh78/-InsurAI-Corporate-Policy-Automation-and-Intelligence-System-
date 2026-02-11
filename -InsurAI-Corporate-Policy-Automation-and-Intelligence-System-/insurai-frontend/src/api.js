@@ -1,7 +1,7 @@
 import axios from "axios";
 
 // ✅ HARDCODED Production URL - Environment variable issue fix
-const BASE_URL = "https://ingenious-surprise-production.up.railway.app";
+const BASE_URL = "https://insurai-backend-production.up.railway.app";
 
 console.log("🚀 API Base URL:", BASE_URL);
 

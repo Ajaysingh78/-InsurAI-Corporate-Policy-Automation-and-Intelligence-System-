@@ -12,8 +12,7 @@ export default function EmployeeLogin() {
   const navigate = useNavigate();
 
   const validateEmail = (email) => {
-    const re =
-      /^[a-zA-Z0-9._%+-]+@[a-zA-Z][a-zA-Z0-9-]*(\.[a-zA-Z]{2,})+$/;
+    const re = /^[a-zA-Z0-9._%+-]+@[a-zA-Z][a-zA-Z0-9-]*(\.[a-zA-Z]{2,})+$/;
     return re.test(email);
   };
 
@@ -29,10 +28,13 @@ export default function EmployeeLogin() {
     }
 
     try {
-      const res = await axios.post("https://ingenious-surprise-production.up.railway.app/auth/login", {
-        email: email.trim().toLowerCase(),
-        password,
-      });
+      const res = await axios.post(
+        "https://insurai-backend-production.up.railway.app/auth/login",
+        {
+          email: email.trim().toLowerCase(),
+          password,
+        },
+      );
 
       const data = res.data;
 
@@ -245,12 +247,6 @@ export default function EmployeeLogin() {
     </div>
   );
 }
-
-
-
-
-
-
 
 // import React, { useState } from "react";
 // import { useNavigate, Link } from "react-router-dom";
@@ -528,32 +524,6 @@ export default function EmployeeLogin() {
 //   );
 // }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // import React, { useState } from "react";
 // import { useNavigate, Link } from "react-router-dom";
 // import "bootstrap/dist/css/bootstrap.min.css";
@@ -586,7 +556,7 @@ export default function EmployeeLogin() {
 //     }
 
 //     try {
-//       const res = await axios.post("https://ingenious-surprise-production.up.railway.app/auth/login", {
+//       const res = await axios.post("https://insurai-backend-production.up.railway.app/auth/login", {
 //         email: email.trim().toLowerCase(),
 //         password,
 //       });
@@ -650,7 +620,7 @@ export default function EmployeeLogin() {
 //       >
 //         <div className="row g-0">
 //           {/* Left Side - Image & Content */}
-//           <div 
+//           <div
 //             className="col-md-6 d-none d-md-flex"
 //             style={{
 //               background: "linear-gradient(135deg, #1b262c 0%, #206c95 100%)",
@@ -1000,8 +970,8 @@ export default function EmployeeLogin() {
 //                   <button
 //                     type="button"
 //                     className="btn btn-link p-0 text-decoration-none"
-//                     style={{ 
-//                       fontSize: "0.85rem", 
+//                     style={{
+//                       fontSize: "0.85rem",
 //                       color: "#206c95",
 //                       fontWeight: "500",
 //                       transition: "color 0.3s ease"
